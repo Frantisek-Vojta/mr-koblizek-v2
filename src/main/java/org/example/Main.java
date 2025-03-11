@@ -111,18 +111,16 @@ public class Main extends ListenerAdapter {
         // Ping command
         else if (command.equals("ping")) {
             long latency = event.getJDA().getGatewayPing();
-            event.reply("🏓 Pong! Latency: `" + latency + "ms`").queue();
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setTitle("Ping")
+                    .setDescription("Latency: " + latency + " ms")
+                    .setColor(0xfcb603);
+
+            event.replyEmbeds(embed.build()).queue();
         }
 
-        else if (command.equals("ping")) {
-            long latency = event.getJDA().getGatewayPing();
-            event.reply("🏓 Pong! Latency: `" + latency + "ms`").queue();
-        }
 
 
-        else if (command.equals("idk")) {
-            event.reply("¯\\_(ツ)_/¯ nevim co asdad bdas adg da dasasd gdas jsakgasnd  adksg asd gasd kk adgskhda a djsga sd aisdzg asd aoszidg ghda uoagzg asdu sdasdassdem zadat pr,snmadfbhksdfjhsdflůhjljdfhsljfhsd sfhd hsdf hsdfb kouprvime fakt nevim xd fakt ja nevim uz kamo ja fakt nevim :D to aby se to dalo na git xd co sem mam dat aby to fakt fungovalo xd").queue();
-        }
     }
 
     private void sendRandomImage(MessageChannel channel, Path directory, String title, String description, SlashCommandInteractionEvent event) throws IOException {
