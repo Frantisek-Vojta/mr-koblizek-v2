@@ -115,7 +115,7 @@ public class Main extends ListenerAdapter {
         }
 
         else if (command.equals("idk")) {
-            event.reply("¯\\_(ツ)_/¯ nevim co sem zadat prouprvime fakt nevim xdto aby se to dalo na git xd co sem mam dat aby to fakt fungovalo xd").queue();
+            event.reply("¯\\_(ツ)_/¯ nevim co sem zadat prouprvime fakt nevim xd fakt ja nevim uz to aby se to dalo na git xd co sem mam dat aby to fakt fungovalo xd").queue();
         }
     }
 
