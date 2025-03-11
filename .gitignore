@@ -10,7 +10,7 @@ target/
 
 autopush.bat
 
-.idea/
+.idea
 
 ### Eclipse ###
 .apt_generated
