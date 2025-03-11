@@ -115,7 +115,7 @@ public class Main extends ListenerAdapter {
         }
 
         else if (command.equals("idk")) {
-            event.reply("¯\\_(ツ)_/¯ nevim co asdadsakgasnd  adksg asd gasd kk adgskhda a djsga sd aisdzg asd aoszidg ghda uoagzg asdu sdasdassdem zadat pr,snmadfbhksdfjhsdflůhjljdfhsljfhsd sfhd hsdf hsdfb kouprvime fakt nevim xd fakt ja nevim uz kamo ja fakt nevim :D to aby se to dalo na git xd co sem mam dat aby to fakt fungovalo xd").queue();
+            event.reply("¯\\_(ツ)_/¯ nevim co asdad bdas adgasd gdas jsakgasnd  adksg asd gasd kk adgskhda a djsga sd aisdzg asd aoszidg ghda uoagzg asdu sdasdassdem zadat pr,snmadfbhksdfjhsdflůhjljdfhsljfhsd sfhd hsdf hsdfb kouprvime fakt nevim xd fakt ja nevim uz kamo ja fakt nevim :D to aby se to dalo na git xd co sem mam dat aby to fakt fungovalo xd").queue();
         }
     }
 
