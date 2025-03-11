@@ -107,7 +107,7 @@ public class Main extends ListenerAdapter {
                     .setFooter("I don't know what to add? DM me for tips plz");
             event.replyEmbeds(embed.build()).queue();
         }
-ted udelam toto
+
         // Ping command
         else if (command.equals("ping")) {
             long latency = event.getJDA().getGatewayPing();
@@ -115,7 +115,7 @@ ted udelam toto
         }
 
         else if (command.equals("idk")) {
-            event.reply("¯\\_(ツ)_/¯").queue();
+            event.reply("¯\\_(ツ)_/¯ nevim co sem zadat proto aby se to dalo na git xd").queue();
         }
     }
 
