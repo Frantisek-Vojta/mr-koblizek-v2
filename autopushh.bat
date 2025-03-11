@@ -7,6 +7,10 @@ for /f "tokens=1-4 delims=/- " %%a in ("%date%") do set currentDateTime=%%a-%%b-
 :: Nastavení commit zprávy s názvem "commit" a aktuálním datem a časem
 set finalCommitMessage=commit - %currentDateTime%
 
+:: Stáhne změny z origin/main
+echo Stahuji změny z origin/main...
+git pull origin main
+
 :: Přidání změn do Gitu
 git add .
 
