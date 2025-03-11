@@ -113,7 +113,7 @@ public class Main extends ListenerAdapter {
             long latency = event.getJDA().getGatewayPing();
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Ping")
-                    .setDescription("Latency: " + latency + " ms")
+                    .setDescription("Lateency: " + latency + " ms")
                     .setColor(0xfcb603);
 
             event.replyEmbeds(embed.build()).queue();
