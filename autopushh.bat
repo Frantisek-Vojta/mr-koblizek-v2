@@ -1,19 +1,15 @@
-Set-Location -Path "C:\Users\xCel_\Desktop\mr-koblih-v5312789"
+@echo off
+cd /d "C:\Users\xCel_\Desktop\mr-koblih-v5312789"
 
-$commitMessage = Read-Host "Zadejte název pro commit"
+set /p commitMessage="Zadejte název pro commit: "
 
-$currentDateTime = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+for /f "tokens=1-4 delims=/- " %%a in ("%date%") do set currentDateTime=%%a-%%b-%%c_%%d
 
-$finalCommitMessage = "$commitMessage - $currentDateTime"
+set finalCommitMessage=%commitMessage% - %currentDateTime%
 
 git add .
-
-git commit -m "$finalCommitMessage"
-
+git commit -m "%finalCommitMessage%"
 git push origin main
 
-Write-Host "Commit a push byl úspěšně dokončen."
-
-Write-Host "Stiskněte Enter pro ukončení..."
-$null = Read-Host
-$null = Read-Host
+echo Commit a push byl úspěšně dokončen.
+pause
