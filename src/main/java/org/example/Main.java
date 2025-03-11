@@ -114,19 +114,14 @@ public class Main extends ListenerAdapter {
             event.reply("🏓 Pong! Latency: `" + latency + "ms`").queue();
         }
 
-<<<<<<< HEAD
         else if (command.equals("ping")) {
             long latency = event.getJDA().getGatewayPing();
             event.reply("🏓 Pong! Latency: `" + latency + "ms`").queue();
         }
 
-        
+
         else if (command.equals("idk")) {
             event.reply("¯\\_(ツ)_/¯ nevim co asdad bdas adg da dasasd gdas jsakgasnd  adksg asd gasd kk adgskhda a djsga sd aisdzg asd aoszidg ghda uoagzg asdu sdasdassdem zadat pr,snmadfbhksdfjhsdflůhjljdfhsljfhsd sfhd hsdf hsdfb kouprvime fakt nevim xd fakt ja nevim uz kamo ja fakt nevim :D to aby se to dalo na git xd co sem mam dat aby to fakt fungovalo xd").queue();
-=======
-        else if (command.equals("idk")) {
-            event.reply("¯\\_(ツ)_/¯ nevim co sem zadat proto aby se to dalo na git xd co sem mam dat aby to fakt fungovalo xd").queue();
->>>>>>> ca778dfa8709abea8757ef9ccc6d96e8eca4bc61
         }
     }
 
