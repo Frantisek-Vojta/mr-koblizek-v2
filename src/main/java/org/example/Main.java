@@ -125,7 +125,7 @@ public class Main extends ListenerAdapter {
 
     private void sendRandomImage(MessageChannel channel, Path directory, String title, String description, SlashCommandInteractionEvent event) throws IOException {
         if (!Files.exists(directory) || Files.list(directory).count() == 0) {
-            event.reply("There are no images in that directory lmao u must tell xcel to add xdddddddd xd").queue();
+            event.reply("There are no images in that directory lmao u must tell xcel to add xdd).queue();
             return;
         }
         Random random = new Random();
