@@ -87,13 +87,13 @@ public class Main extends ListenerAdapter {
         // Bot info command
         else if (command.equals("botinfo")) {
             EmbedBuilder embed = new EmbedBuilder()
-                    .setTitle("Bot Info")
+                    .setTitle("<:icon:1347146418049122315> Bot Info <:icon:1347146418049122315>")
                     .setDescription("Info about me")
                     .addField("I'm a cool and best Discord bot! || frfr ||", "this is real btw", false)
                     .addField("I'm created by: xCel_cze#0", " ", false)
                     .addField("I'm created by: Java programming language", "I think xcel love this language ", false)
                     .addField("xCel is very very cool and good boy because he gave me life", "frfr", false)
-                    .addField("Jsem na **\" + event.getJDA().getGuilds().size() + \"** serverech!", "plz add me to your server im good bot ): ", false) // ZDE JE NOVÁ ŘÁDKA
+                    .addField("I´m on **" + event.getJDA().getGuilds().size() + "** servers!", "plz add me to your server im good bot ): ", false) // ZDE JE NOVÁ ŘÁDKA
                     .setColor(0xfcb603);
             event.replyEmbeds(embed.build()).queue();
         }
