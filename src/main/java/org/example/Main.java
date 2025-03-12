@@ -93,9 +93,11 @@ public class Main extends ListenerAdapter {
                     .addField("I'm created by: xCel_cze#0", " ", false)
                     .addField("I'm created by: Java programming language", "I think xcel love this language ", false)
                     .addField("xCel is very very cool and good boy because he gave me life", "frfr", false)
+                    .addField("Jsem na **\" + event.getJDA().getGuilds().size() + \"** serverech!", "plz add me to your server im good bot ): ", false) // ZDE JE NOVÁ ŘÁDKA
                     .setColor(0xfcb603);
             event.replyEmbeds(embed.build()).queue();
         }
+
 
         // Help command
         else if (command.equals("help")) {
@@ -124,6 +126,10 @@ public class Main extends ListenerAdapter {
         }
 
 
+        //nevim
+        //else if (command.equals("idk")) {}
+
+
 
     }
 
@@ -145,4 +151,6 @@ public class Main extends ListenerAdapter {
                     .addFiles(FileUpload.fromData(image, image.getName())).queue();
         }
     }
+
+
 }
