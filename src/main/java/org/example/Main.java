@@ -114,6 +114,36 @@ public class Main extends ListenerAdapter {
             event.replyEmbeds(embed.build()).queue();
         }
 
+
+
+        //roulette
+        else if (command.equals("roulette")) {
+            // Příjem parametrů od uživatele - barva a částka
+            String color = event.getOption("color") != null ? event.getOption("color").getAsString() : "";
+            double betAmount = event.getOption("amount") != null ? event.getOption("amount").getAsDouble() : 0;
+
+            // Výběr náhodné barvy (red, black, nebo green)
+            String[] colors = {"red", "black", "green"};
+            Random random = new Random();
+            String result = colors[random.nextInt(colors.length)];
+
+            // Určujeme, zda uživatel vyhrál nebo prohrál
+            String outcome = result.equals(color) ? "You won!" : "You lost!";
+
+            // Odpověď pro uživatele
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setTitle("Roulette")
+                    .setDescription("You chose: " + color + "\n" +
+                            "The result is: " + result + "\n" +
+                            "Bet amount: " + betAmount + "\n" +
+                            outcome)
+                    .setColor(0xfcb603);
+
+            event.replyEmbeds(embed.build()).queue();
+        }
+
+
+
         // Ping command
         else if (command.equals("ping")) {
             long latency = event.getJDA().getGatewayPing();
@@ -125,9 +155,6 @@ public class Main extends ListenerAdapter {
             event.replyEmbeds(embed.build()).queue();
         }
 
-
-        //nevim
-        //else if (command.equals("idk")) {}
 
 
 
