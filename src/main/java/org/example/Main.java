@@ -2,7 +2,7 @@ package org.example;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Emoji;
+
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -24,7 +24,7 @@ public class Main extends ListenerAdapter {
     private static final Path IMG_KOBLIZEK = Paths.get("imgs/koblizek");
     private static final Path IMG_MEME = Paths.get("imgs/meme");
     private static final Path IMG_NITRO = Paths.get("imgs/nitro");
-    private Emoji FileUpload;
+
 
     public static void main(String[] args) throws InterruptedException, LoginException {
         if (args.length < 1) {
@@ -91,7 +91,8 @@ public class Main extends ListenerAdapter {
                     .setDescription("Info about me")
                     .addField("I'm a cool and best Discord bot! || frfr ||", "this is real btw", false)
                     .addField("I'm created by: xCel_cze#0", " ", false)
-                    .addField("xCel is very very cool and good boy because he gave me life", "relatable", false)
+                    .addField("I'm created by: Java programming language", "I think xcel love this language ", false)
+                    .addField("xCel is very very cool and good boy because he gave me life", "frfr", false)
                     .setColor(0xfcb603);
             event.replyEmbeds(embed.build()).queue();
         }
@@ -128,7 +129,7 @@ public class Main extends ListenerAdapter {
 
     private void sendRandomImage(MessageChannel channel, Path directory, String title, String description, SlashCommandInteractionEvent event) throws IOException {
         if (!Files.exists(directory) || Files.list(directory).count() == 0) {
-            event.reply("There are no immaages in thaat diirectory lmao u must tell xcel to add xdd).queue();
+            event.reply("There ar.queue");
             return;
         }
         Random random = new Random();
@@ -141,7 +142,7 @@ public class Main extends ListenerAdapter {
                     .setColor(0xfcb603)
                     .setImage("attachment://" + image.getName());
             event.replyEmbeds(embed.build())
-                    .addFile(FileUpload.fromData(image, image.getName())).queue();
+                    .addFiles(FileUpload.fromData(image, image.getName())).queue();
         }
     }
 }
