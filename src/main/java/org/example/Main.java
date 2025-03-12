@@ -2,6 +2,7 @@ package org.example;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -10,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.utils.FileUpload;
 
+import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,8 +24,9 @@ public class Main extends ListenerAdapter {
     private static final Path IMG_KOBLIZEK = Paths.get("imgs/koblizek");
     private static final Path IMG_MEME = Paths.get("imgs/meme");
     private static final Path IMG_NITRO = Paths.get("imgs/nitro");
+    private Emoji FileUpload;
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, LoginException {
         if (args.length < 1) {
             throw new RuntimeException("Missing angrument xd");
         }
@@ -138,7 +141,7 @@ public class Main extends ListenerAdapter {
                     .setColor(0xfcb603)
                     .setImage("attachment://" + image.getName());
             event.replyEmbeds(embed.build())
-                    .addFiles(FileUpload.fromData(image, image.getName())).queue();
+                    .addFile(FileUpload.fromData(image, image.getName())).queue();
         }
     }
 }
