@@ -12,6 +12,12 @@ autopush.bat
 
 .idea
 
+
+### TOKEN ###
+**/config.properties
+
+
+
 ### Eclipse ###
 .apt_generated
 .classpath
