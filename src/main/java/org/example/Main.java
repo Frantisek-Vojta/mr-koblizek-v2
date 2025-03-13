@@ -123,7 +123,7 @@ public class Main extends ListenerAdapter {
             event.replyEmbeds(embed.build()).queue();
         }
 
-        // Příkaz ping
+        // Příkaz pingg
         else if (command.equals("ping")) {
             long latency = event.getJDA().getGatewayPing();
             EmbedBuilder embed = new EmbedBuilder()
