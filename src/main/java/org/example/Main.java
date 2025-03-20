@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.utils.FileUpload;
 
-import javax.security.auth.login.LoginException;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +35,7 @@ public class Main extends ListenerAdapter {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException, LoginException {
+    public static void main(String[] args) throws InterruptedException{
         // Načtení tokenu ze souboru
         String token = loadToken("src/config.properties");
 
@@ -101,7 +101,7 @@ public class Main extends ListenerAdapter {
                     .setDescription("Info about me")
                     .addField("I'm a cool and best Discord bot! || frfr ||", "this is real btw", false)
                     .addField("I'm created by: xCel_cze#0", " ", false)
-                    .addField("I'm created by: Java programming language", "I think xcel love this language ", false)
+                    .addField("I'm created in Java programming language", "I think xcel love this language ", false)
                     .addField("xCel is very very cool and good boy because he gave me life", "frfr", false)
                     .addField("I´m on **" + event.getJDA().getGuilds().size() + "** servers!", "plz add me to your server im good bot ): ", false)
                     .setColor(0xfcb603);
