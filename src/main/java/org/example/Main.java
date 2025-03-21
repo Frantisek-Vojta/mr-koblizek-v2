@@ -33,6 +33,11 @@ import java.util.Random;
 
 
 
+
+
+
+
+
 public class Main extends ListenerAdapter {
 
     private static final Path IMG_KOBLIZEK = Paths.get("imgs/koblizek");
