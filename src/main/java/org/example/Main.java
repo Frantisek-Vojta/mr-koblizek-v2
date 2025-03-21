@@ -196,5 +196,10 @@ public class Main extends ListenerAdapter {
             event.replyEmbeds(embed.build())
                     .addFiles(FileUpload.fromData(image, image.getName())).queue();
         }
+
+
+
+
+
     }
 }
