@@ -121,7 +121,20 @@ public class Main extends ListenerAdapter {
                     .setColor(0xfcb603)
                     .setFooter("I don't know what to add? DM me for tips plz");
             event.replyEmbeds(embed.build()).queue();
-        }
+
+
+            // funguje auto commit? ano nebo ne
+
+        } else if (command.equals("guess")) {
+                String[] parts = event.getOptions().get(0).getAsString().split("\\s+");
+
+                if (parts.length != 1) {
+                    event.replyEmbeds(new EmbedBuilder()
+                            .setDescription("Please use the command like: /guess 1 or /guess 2")
+                            .setColor(0xfcb603)
+                            .build()).queue();
+                    return;
+                }
 
         // Příkaz pingg
         else if (command.equals("ping")) {
