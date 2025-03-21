@@ -5,11 +5,13 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 
+import javax.swing.text.html.Option;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,6 +37,13 @@ public class Main extends ListenerAdapter {
         }
     }
 
+
+
+
+
+// komentar je na to jestli funguje --force push xd xd xd
+
+
     public static void main(String[] args) throws InterruptedException{
         // Načtení tokenu ze souboru
         String token = loadToken("src/config.properties");
@@ -57,7 +66,9 @@ public class Main extends ListenerAdapter {
                         Commands.slash("botinfo", "Send info about me"),
                         Commands.slash("help", "Show help"),
                         Commands.slash("ping", "Check bot's latency"),
-                        Commands.slash("idk", "Send shrug emoji")
+                        Commands.slash("idk", "Send shrug emoji"),
+                        Commands.slash("guess", "Guess the numbeer" )
+                                .addOption(OptionType.INTEGER, "number", "Your guess 1 or 2", true)
                 )
                 .queue();
     }
@@ -118,6 +129,7 @@ public class Main extends ListenerAdapter {
                     .addField("/idk", "Show: ¯\\_(ツ)_/¯", false)
                     .addField("/freenitro", "Give you free nitro frfr noscam 100% working", false)
                     .addField("/meme", "Show random very funny meme", false)
+                    .addField("/guess <your number>", "Guess 1 or 2. If you guess correctly, you'll win!", false)
                     .setColor(0xfcb603)
                     .setFooter("I don't know what to add? DM me for tips plz");
             event.replyEmbeds(embed.build()).queue();
