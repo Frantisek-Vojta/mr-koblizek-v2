@@ -12,6 +12,7 @@ autopush.bat
 
 .idea
 
+push.sh
 
 ### TOKEN ###
 **/config.properties
