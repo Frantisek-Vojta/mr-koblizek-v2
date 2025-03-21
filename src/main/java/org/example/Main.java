@@ -11,6 +11,12 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 
+
+
+
+
+
+
 import javax.swing.text.html.Option;
 import java.io.*;
 import java.nio.file.Files;
@@ -18,10 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.Random;
-
-
-
-
 
 
 
