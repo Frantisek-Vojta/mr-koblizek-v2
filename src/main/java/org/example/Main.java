@@ -136,7 +136,38 @@ public class Main extends ListenerAdapter {
                     return;
                 }
 
-        // Příkaz pingg
+                try {
+                    int guess = Integer.parseInt(parts[0]);
+                    if (guess < 1 || guess > 2) {
+                        event.replyEmbeds(new EmbedBuilder()
+                                .setDescription("The number must be either 1 or 2!")
+                                .setColor(0xfcb603)
+                                .build()).queue();
+                        return;
+                    }
+
+                    int random = (int) (Math.random() * 2) + 1;
+
+                    EmbedBuilder embed = new EmbedBuilder();
+                    if (guess == random) {
+                        embed.setDescription("🎉 **OMG! You won!** 🎉")
+                                .setColor(0x00FF00);
+                    } else {
+                        embed.setDescription("😔 **Bruh! You lost, lil bro** 😔")
+                                .setColor(0xFF0000);
+                    }
+                    event.replyEmbeds(embed.build()).queue();
+                } catch (NumberFormatException e) {
+                    event.replyEmbeds(new EmbedBuilder()
+                            .setDescription("Please provide a valid number: 1 or 2!")
+                            .setColor(0xfcb603)
+                            .build()).queue();
+                }
+            }
+
+
+
+            // Příkaz ping
         else if (command.equals("ping")) {
             long latency = event.getJDA().getGatewayPing();
             EmbedBuilder embed = new EmbedBuilder()
