@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.utils.FileUpload;
 
 
 
-
+// funguje uz ten autopush?
 import javax.swing.text.html.Option;
 import java.io.*;
 import java.nio.file.Files;
