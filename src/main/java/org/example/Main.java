@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.security.auth.login.LoginException;
 import java.io.*;
 import java.nio.file.Files;
@@ -155,7 +156,6 @@ public class Main extends ListenerAdapter {
             event.replyEmbeds(embed.build()).queue();
         }
     }
-
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         // Pokud je autor zprávy bot, zprávu ignorujeme
@@ -164,35 +164,41 @@ public class Main extends ListenerAdapter {
         Message message = event.getMessage();
         MessageChannel channel = message.getChannel();
 
-        // Inkrementace počtu zpráv pouze jednou
-        messageCount++;
-
-        // Uložení aktualizovaného počtu zpráv do souboru
-        saveMessageCount();
+        // Pokud je zpráva odpověď (reply), neprovádíme žádnou akci
+        if (message.getReferencedMessage() != null) {
+            return; // Ignorujeme odpovědi
+        }
 
         // Zkontrolujeme, zda byla ve zprávě zmíněna nějaká osoba
-        boolean[] mentionedStaff = {false}; // Použijeme pole pro změnu hodnoty v lambda výrazu
+        AtomicBoolean pingedStaff = new AtomicBoolean(false); // Pomocná proměnná pro zjištění, zda byl někdo s rolí pingnut
 
-
-        
         // Získání uživatelů, kteří byli zmíněni ve zprávě
         for (net.dv8tion.jda.api.entities.User user : message.getMentions().getUsers()) {
+            // Pokud je uživatel stejný jako autor zprávy, ignorujeme ho
+            if (user.getId().equals(event.getAuthor().getId())) {
+                continue; // Pokud se autor pingne sám, přeskočíme to
+            }
+
             // Získáme člena guildy pomocí jeho ID
             event.getGuild().retrieveMemberById(user.getId()).queue(member -> {
-                // Pokud má uživatel specifikovanou roli, pošleme varování
+                // Pokud má uživatel specifikovanou roli
                 if (member.getRoles().stream().anyMatch(role -> role.getId().equals(STAFF_ROLE_ID))) {
-                    // Odesíláme varování pouze jednou
-                    if (!mentionedStaff[0]) {
-                        mentionedStaff[0] = true; // Změna hodnoty pole
-
+                    // Pingnutí člena s rolí, pošleme varování
+                    if (pingedStaff.compareAndSet(false, true)) { // Používáme AtomicBoolean pro změnu hodnoty
                         EmbedBuilder embed = new EmbedBuilder()
                                 .setTitle("Warning")
-                                .setDescription("Do not ping the ** staff ** members please :pleading_face:")
+                                .setDescription("Do not ping the **staff** members please :pleading_face:")
                                 .setFooter("This message was sent: " + messageCount + " times")
                                 .setColor(0xFF0000); // Červená barva pro varování
 
                         channel.sendMessageEmbeds(embed.build()).queue();
                     }
+                }
+
+                // Inkremetace messageCount pokud byl pingnut člen s rolí
+                if (pingedStaff.get()) {
+                    messageCount++;
+                    saveMessageCount(); // Uložení počtu zpráv
                 }
             });
         }
