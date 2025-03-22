@@ -173,6 +173,8 @@ public class Main extends ListenerAdapter {
         // Zkontrolujeme, zda byla ve zprávě zmíněna nějaká osoba
         boolean[] mentionedStaff = {false}; // Použijeme pole pro změnu hodnoty v lambda výrazu
 
+
+        
         // Získání uživatelů, kteří byli zmíněni ve zprávě
         for (net.dv8tion.jda.api.entities.User user : message.getMentions().getUsers()) {
             // Získáme člena guildy pomocí jeho ID
