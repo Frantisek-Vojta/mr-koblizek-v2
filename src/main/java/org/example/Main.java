@@ -7,9 +7,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.utils.FileUpload;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
+
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.security.auth.login.LoginException;
@@ -17,7 +15,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
 import java.util.Random;
 
 public class Main extends ListenerAdapter {
@@ -30,8 +27,7 @@ public class Main extends ListenerAdapter {
     private int messageCount;
 
     public Main() {
-        // Load message count from file
-        loadMessageCount();
+        loadMessageCount(); //load int from messageCount.txt
     }
 
     private void loadMessageCount() {
@@ -44,7 +40,7 @@ public class Main extends ListenerAdapter {
                 }
                 reader.close();
             } else {
-                messageCount = 0; // Default value if the file does not exist
+                messageCount = 0; // if file messageCount.txt doesnt exist the count will start from 0 logicky
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -158,47 +154,43 @@ public class Main extends ListenerAdapter {
     }
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        // Pokud je autor zprávy bot, zprávu ignorujeme
-        if (event.getAuthor().isBot()) return;
+        if (event.getAuthor().isBot()) return; //if person pinged the role but the person is bot it will dont show the message
 
         Message message = event.getMessage();
         MessageChannel channel = message.getChannel();
 
-        // Pokud je zpráva odpověď (reply), neprovádíme žádnou akci
-        if (message.getReferencedMessage() != null) {
-            return; // Ignorujeme odpovědi
+
+        if (message.getReferencedMessage() != null) { //if its reply ping it will dont count
+            return;
         }
 
-        // Zkontrolujeme, zda byla ve zprávě zmíněna nějaká osoba
-        AtomicBoolean pingedStaff = new AtomicBoolean(false); // Pomocná proměnná pro zjištění, zda byl někdo s rolí pingnut
 
-        // Získání uživatelů, kteří byli zmíněni ve zprávě
+        AtomicBoolean pingedStaff = new AtomicBoolean(false); // if in message was someobdy pinged
+
+        // will load the persons who has been pinged
         for (net.dv8tion.jda.api.entities.User user : message.getMentions().getUsers()) {
-            // Pokud je uživatel stejný jako autor zprávy, ignorujeme ho
+            // if person pinged himself it will not count lmao
             if (user.getId().equals(event.getAuthor().getId())) {
-                continue; // Pokud se autor pingne sám, přeskočíme to
+                continue;
             }
 
-            // Získáme člena guildy pomocí jeho ID
+            // if person with that id has role with id
             event.getGuild().retrieveMemberById(user.getId()).queue(member -> {
-                // Pokud má uživatel specifikovanou roli
                 if (member.getRoles().stream().anyMatch(role -> role.getId().equals(STAFF_ROLE_ID))) {
-                    // Pingnutí člena s rolí, pošleme varování
-                    if (pingedStaff.compareAndSet(false, true)) { // Používáme AtomicBoolean pro změnu hodnoty
+                    if (pingedStaff.compareAndSet(false, true)) {
                         EmbedBuilder embed = new EmbedBuilder()
                                 .setTitle("Warning")
                                 .setDescription("Do not ping the **staff** members please :pleading_face:")
                                 .setFooter("This message was sent: " + messageCount + " times")
-                                .setColor(0xFF0000); // Červená barva pro varování
+                                .setColor(0xFF0000); // red color for warnign xd
 
                         channel.sendMessageEmbeds(embed.build()).queue();
                     }
                 }
 
-                // Inkremetace messageCount pokud byl pingnut člen s rolí
                 if (pingedStaff.get()) {
                     messageCount++;
-                    saveMessageCount(); // Uložení počtu zpráv
+                    saveMessageCount(); // count +1 for the count
                 }
             });
         }
