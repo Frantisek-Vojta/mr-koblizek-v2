@@ -240,18 +240,16 @@ public class Main extends ListenerAdapter {
             return;
         }
 
-        // Čtení všech řádků ze souboru
+        // idk but its working
         List<String> lines = Files.readAllLines(filePath);
         if (lines.isEmpty()) {
             event.reply("The file is empty.").queue();
             return;
         }
 
-        // Výběr náhodné řádky
         Random random = new Random();
         String randomText = lines.get(random.nextInt(lines.size()));
 
-        // Odeslání odpovědi
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle(title)
                 .setDescription(randomText)
