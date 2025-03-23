@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.JDABuilder;
 
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.security.auth.login.LoginException;
 import java.io.*;
@@ -20,9 +19,9 @@ import java.util.Random;
 public class Main extends ListenerAdapter {
 
     private static final String STAFF_ROLE_ID = "1325367756182257674"; // ID role to check
-    private static final Path IMG_KOBLIZEK = Paths.get("imgs/koblizek");
-    private static final Path IMG_MEME = Paths.get("imgs/meme");
-    private static final Path IMG_NITRO = Paths.get("imgs/nitro");
+    private static final Path IMG_KOBLIZEK = Paths.get("imgs/koblizek"); // path to donuts
+    private static final Path IMG_MEME = Paths.get("imgs/meme"); // path to memes
+    private static final Path IMG_NITRO = Paths.get("imgs/nitro"); // path to free nitro
     private static final String COUNTER_FILE = "messageCount.txt"; // Path to the counter file
     private int messageCount;
 
