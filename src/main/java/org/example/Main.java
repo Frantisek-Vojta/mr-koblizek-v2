@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.JDABuilder;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.security.auth.login.LoginException;
 import java.io.*;
@@ -23,6 +24,7 @@ public class Main extends ListenerAdapter {
     private static final Path IMG_MEME = Paths.get("imgs/meme"); // path to memes
     private static final Path IMG_NITRO = Paths.get("imgs/nitro"); // path to free nitro
     private static final String COUNTER_FILE = "messageCount.txt"; // Path to the counter file
+    private static final Path BRAINROT_FILE = Paths.get("brainrot.txt");
     private int messageCount;
 
     public Main() {
@@ -67,7 +69,19 @@ public class Main extends ListenerAdapter {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        } else if (command.equals("meme")) {
+        } else if (command.equals("brainrot")) {
+            try {
+                sendRandomText(channel, BRAINROT_FILE, "Random brainrot shit", "Here is your brainrot skibidi shit!", event);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+
+
+
+        else if (command.equals("meme")) {
             try {
                 sendRandomImage(channel, IMG_MEME, "😂 Random meme 😂", "Here is your random meme!", event);
             } catch (IOException e) {
@@ -100,6 +114,7 @@ public class Main extends ListenerAdapter {
                     .addField("/freenitro", "Give you free nitro frfr noscam 100% working", false)
                     .addField("/meme", "Show random very funny meme", false)
                     .addField("/guess <your number>", "Guess 1 or 2. If you guess correctly, you'll win!", false)
+                    .addField("/brainrot", "Show random brainrot text", false)
                     .setColor(0xfcb603)
                     .setFooter("I don't know what to add? DM me for tips plz");
             event.replyEmbeds(embed.build()).queue();
@@ -217,6 +232,34 @@ public class Main extends ListenerAdapter {
                     .queue();
         }
     }
+
+
+    private void sendRandomText(MessageChannel channel, Path filePath, String title, String description, SlashCommandInteractionEvent event) throws IOException {
+        if (!Files.exists(filePath)) {
+            event.reply("There are no texts available.").queue();
+            return;
+        }
+
+        // Čtení všech řádků ze souboru
+        List<String> lines = Files.readAllLines(filePath);
+        if (lines.isEmpty()) {
+            event.reply("The file is empty.").queue();
+            return;
+        }
+
+        // Výběr náhodné řádky
+        Random random = new Random();
+        String randomText = lines.get(random.nextInt(lines.size()));
+
+        // Odeslání odpovědi
+        EmbedBuilder embed = new EmbedBuilder()
+                .setTitle(title)
+                .setDescription(randomText)
+                .setColor(0xfcb603);
+
+        event.replyEmbeds(embed.build()).queue();
+    }
+
 
     public static void main(String[] args) throws LoginException {
         JDABuilder.createDefault("MTM0NjkwODA1MTU5MjE4NzkxNA.GRiZai.aAx__DRUYW3DBSfhdgWKCecyGJ9dsAVGG1qd6c")
