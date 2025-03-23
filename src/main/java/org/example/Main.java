@@ -247,7 +247,7 @@ public class Main extends ListenerAdapter {
             return;
         }
 
-        
+
         Random random = new Random();
         String randomText = lines.get(random.nextInt(lines.size()));
 
