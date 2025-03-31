@@ -41,7 +41,7 @@ public class Main extends ListenerAdapter {
                 }
                 reader.close();
             } else {
-                messageCount = 0; // if file messageCount.txt doesnt exist the count will start from 0 logicky
+                messageCount = 0; // if file messageCount.txt doesnt exist the count will start from 0 logicky I don't know how to say in english xd
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -57,6 +57,9 @@ public class Main extends ListenerAdapter {
             e.printStackTrace();
         }
     }
+
+    // just comment to proof that i use comments
+
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
@@ -77,8 +80,6 @@ public class Main extends ListenerAdapter {
             }
 
         }
-
-
 
 
         else if (command.equals("meme")) {
@@ -179,6 +180,8 @@ public class Main extends ListenerAdapter {
         }
 
 
+
+
         AtomicBoolean pingedStaff = new AtomicBoolean(false); // if in message was someobdy pinged
 
         // will load the persons who has been pinged
@@ -248,6 +251,9 @@ public class Main extends ListenerAdapter {
         }
 
 
+
+
+        // komentar abych mel commity protoze mam rad commity a potrebuju stats frfr
 
 
         Random random = new Random();
