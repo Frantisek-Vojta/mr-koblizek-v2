@@ -269,8 +269,11 @@ public class Main extends ListenerAdapter {
 
 
     public static void main(String[] args) throws LoginException {
-        JDABuilder.createDefault("MTM0NjkwODA1MTU5MjE4NzkxNA.GRiZai.aAx__DRUYW3DBSfhdgWKCecyGJ9dsAVGG1qd6c")
+        JDABuilder.createDefault("MTM0NjkwODA1MTU5MjE4NzkxNA.GRiZai.aAx__DRUYW3DBSfhdgWKCecyGJ9dsAVGG1qd6c") // this is a token that i cant share
                 .addEventListeners(new Main())
                 .build();
+
+
+
     }
 }
