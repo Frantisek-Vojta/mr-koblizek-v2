@@ -58,7 +58,7 @@ public class Main extends ListenerAdapter {
         }
     }
 
-    // just comment to proof that i use comments
+    // comment to proof that i use comments
 
 
     @Override
@@ -115,9 +115,9 @@ public class Main extends ListenerAdapter {
                     .addField("/freenitro", "Give you free nitro frfr noscam 100% working", false)
                     .addField("/meme", "Show random very funny meme", false)
                     .addField("/guess <your number>", "Guess 1 or 2. If you guess correctly, you'll win!", false)
-                    .addField("/brainrot", "Show random brainrot text", false)
+                    .addField("/brainrot", "Show random brainrot shit", false)
                     .setColor(0xfcb603)
-                    .setFooter("I don't know what to add? DM me for tips plz");
+                    .setFooter("I don't know what to add :( DM me for tips plz");
             event.replyEmbeds(embed.build()).queue();
         } else if (command.equals("guess")) {
             String[] parts = event.getOptions().get(0).getAsString().split("\\s+");
