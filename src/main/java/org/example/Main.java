@@ -3,12 +3,15 @@ package org.example;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.JDABuilder;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.security.auth.login.LoginException;
 import java.io.*;
@@ -79,10 +82,7 @@ public class Main extends ListenerAdapter {
                 throw new RuntimeException(e);
             }
 
-        }
-
-
-        else if (command.equals("meme")) {
+        } else if (command.equals("meme")) {
             try {
                 sendRandomImage(channel, IMG_MEME, "😂 Random meme 😂", "Here is your random meme!", event);
             } catch (IOException e) {
@@ -116,6 +116,7 @@ public class Main extends ListenerAdapter {
                     .addField("/meme", "Show random very funny meme", false)
                     .addField("/guess <your number>", "Guess 1 or 2. If you guess correctly, you'll win!", false)
                     .addField("/brainrot", "Show random brainrot shit", false)
+                    .addField("/love <user1> <user2>", "Show how many % they love each other", false)
                     .setColor(0xfcb603)
                     .setFooter("I don't know what to add :( DM me for tips plz");
             event.replyEmbeds(embed.build()).queue();
@@ -144,10 +145,10 @@ public class Main extends ListenerAdapter {
 
                 EmbedBuilder embed = new EmbedBuilder();
                 if (guess == random) {
-                    embed.setDescription("🎉 **OMG! You won good boooy!** 🎉")
+                    embed.setDescription("🎉 **You won good boooy!** 🎉")
                             .setColor(0x00FF00);
                 } else {
-                    embed.setDescription("😔 **Bruh! You lost, lil bro** 😔")
+                    embed.setDescription("😔 **You lost lil bro** 😔")
                             .setColor(0xFF0000);
                 }
                 event.replyEmbeds(embed.build()).queue();
@@ -165,7 +166,21 @@ public class Main extends ListenerAdapter {
                     .setColor(0xfcb603);
 
             event.replyEmbeds(embed.build()).queue();
+        } else if (command.equals("love")) {
+
+            User user1 = Objects.requireNonNull(event.getOption("user1")).getAsUser();
+            User user2 = Objects.requireNonNull(event.getOption("user2")).getAsUser();
+
+            int lovePercent = ThreadLocalRandom.current().nextInt(0, 101);
+
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setTitle(":smiling_face_with_3_hearts: Love percentage :smiling_face_with_3_hearts: ")
+                    .setDescription(user1.getAsMention() + " and " + user2.getAsMention() + " love " + lovePercent + "%")
+                    .setColor(0xfcb603);
+
+            event.replyEmbeds(embed.build()).queue();
         }
+
     }
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -191,7 +206,7 @@ public class Main extends ListenerAdapter {
                 continue;
             }
 
-            // if person with that id has role with id
+            // if person has role and the role has the correct ID
             event.getGuild().retrieveMemberById(user.getId()).queue(member -> {
                 if (member.getRoles().stream().anyMatch(role -> role.getId().equals(STAFF_ROLE_ID))) {
                     if (pingedStaff.compareAndSet(false, true)) {
@@ -272,8 +287,5 @@ public class Main extends ListenerAdapter {
         JDABuilder.createDefault("MTM0NjkwODA1MTU5MjE4NzkxNA.GRiZai.aAx__DRUYW3DBSfhdgWKCecyGJ9dsAVGG1qd6c") // this is a token that i cant share
                 .addEventListeners(new Main())
                 .build();
-
-
-
     }
 }
