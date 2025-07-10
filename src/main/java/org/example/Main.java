@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
 import javax.security.auth.login.LoginException;
 import java.io.*;
 import java.nio.file.Files;
@@ -29,46 +31,45 @@ import java.util.Random;
 public class Main extends ListenerAdapter {
 
     private static final String STAFF_ROLE_ID = "1325367756182257674"; // ID role to check
+    private static final String APPROVED_ROLE_ID = "1343551943485685760";
+    private static final String MUTE_ROLE_ID = "1392606203577630783"; // Replace with your mute role ID // Replace with your mute role ID
     private static final Path IMG_KOBLIZEK = Paths.get("imgs/koblizek"); // path to donuts
     private static final Path IMG_MEME = Paths.get("imgs/meme"); // path to memes
     private static final Path IMG_NITRO = Paths.get("imgs/nitro"); // path to free nitro
-    private static final String COUNTER_FILE = "messageCount.txt"; // Path to the counter file
+    private static final String STAFF_COUNTER_FILE = "staffMessageCount.txt"; // Path to the staff counter file
     private static final Path BRAINROT_FILE = Paths.get("brainrot.txt");
-    private int messageCount;
+    private int staffMessageCount;
 
     public Main() {
-        loadMessageCount(); //load int from messageCount.txt
+        loadStaffMessageCount(); //load int from staffMessageCount.txt
     }
 
-    private void loadMessageCount() {
+    private void loadStaffMessageCount() {
         try {
-            if (Files.exists(Paths.get(COUNTER_FILE))) {
-                BufferedReader reader = new BufferedReader(new FileReader(COUNTER_FILE));
+            if (Files.exists(Paths.get(STAFF_COUNTER_FILE))) {
+                BufferedReader reader = new BufferedReader(new FileReader(STAFF_COUNTER_FILE));
                 String line = reader.readLine();
                 if (line != null) {
-                    messageCount = Integer.parseInt(line);
+                    staffMessageCount = Integer.parseInt(line);
                 }
                 reader.close();
             } else {
-                messageCount = 0; // if file messageCount.txt doesnt exist the count will start from 0 logicky I don't know how to say in english xd
+                staffMessageCount = 0; // if file staffMessageCount.txt doesnt exist the count will start from 0
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void saveMessageCount() {
+    private void saveStaffMessageCount() {
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(COUNTER_FILE));
-            writer.write(String.valueOf(messageCount));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(STAFF_COUNTER_FILE));
+            writer.write(String.valueOf(staffMessageCount));
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    // comment to proof that i have use comments
-
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
@@ -96,7 +97,7 @@ public class Main extends ListenerAdapter {
             }
         } else if (command.equals("freenitro")) {
             try {
-                sendRandomImage(channel, IMG_NITRO, ":rocket: Here is your free nitro :rocket:", "No scam 100% working no virus frfr", event);
+                sendRandomImage(channel,  IMG_NITRO, ":rocket: Here is your free nitro :rocket:", "No scam 100% working no virus frfr", event);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -123,30 +124,31 @@ public class Main extends ListenerAdapter {
                     .addField("/guess <your number>", "Guess 1 or 2. If you guess correctly, you'll win!", false)
                     .addField("/brainrot", "Show random brainrot shit", false)
                     .addField("/love <user1> <user2>", "Show how many % they love each other", false)
+                    .addField("/rules <category>", "Show rules for specific category", false)
                     .setColor(0xfcb603)
                     .setFooter("I don't know what to add :( DM me for tips plz");
             event.replyEmbeds(embed.build()).queue();
 
         }   else if (event.getName().equals("guess")) {
-                // Získání vybraného čísla (1 nebo 2)
-                int guess = Objects.requireNonNull(event.getOption("number")).getAsInt();
+            // Získání vybraného čísla (1 nebo 2)
+            int guess = Objects.requireNonNull(event.getOption("number")).getAsInt();
 
-                // Náhodné číslo 1 nebo 2
-                int random = (int) (Math.random() * 2) + 1;
+            // Náhodné číslo 1 nebo 2
+            int random = (int) (Math.random() * 2) + 1;
 
-                // Vytvoření embed zprávy
-                EmbedBuilder embed = new EmbedBuilder();
+            // Vytvoření embed zprávy
+            EmbedBuilder embed = new EmbedBuilder();
 
-                if (guess == random) {
-                    embed.setDescription("🎉 **You won good boooy!** 🎉")
-                            .setColor(0x00FF00);  // zelená barva
-                } else {
-                    embed.setDescription("😔 **You lost lil bro** 😔")
-                            .setColor(0xFF0000);  // červená barva
-                }
+            if (guess == random) {
+                embed.setDescription("🎉 **You won good boooy!** 🎉")
+                        .setColor(0x00FF00);  // zelená barva
+            } else {
+                embed.setDescription("😔 **You lost lil bro** 😔")
+                        .setColor(0xFF0000);  // červená barva
+            }
 
-                // Odpověď uživateli
-                event.replyEmbeds(embed.build()).queue();
+            // Odpověď uživateli
+            event.replyEmbeds(embed.build()).queue();
 
 
         } else if (command.equals("ping")) {
@@ -158,65 +160,162 @@ public class Main extends ListenerAdapter {
 
             event.replyEmbeds(embed.build()).queue();
         } else if (event.getName().equals("love")) {
-                User user1 = Objects.requireNonNull(event.getOption("user")).getAsUser();
-                User user2 = Objects.requireNonNull(event.getOption("user2")).getAsUser();
+            User user1 = Objects.requireNonNull(event.getOption("user")).getAsUser();
+            User user2 = Objects.requireNonNull(event.getOption("user2")).getAsUser();
 
-                int lovePercent = ThreadLocalRandom.current().nextInt(0, 101);
+            int lovePercent = ThreadLocalRandom.current().nextInt(0, 101);
 
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setTitle(":smiling_face_with_3_hearts: Love percentage :smiling_face_with_3_hearts:")
+                    .setDescription(user1.getAsMention() + " and " + user2.getAsMention() + " love " + lovePercent + "%")
+                    .setColor(0xfcb603);
+
+            event.replyEmbeds(embed.build()).queue();
+        } else if (event.getName().equals("rules")) {
+            String category = event.getOption("typ").getAsString(); // např. "minecraft", "valka", "discord"
+
+            if (category.equalsIgnoreCase("minecraft")) {
                 EmbedBuilder embed = new EmbedBuilder()
-                        .setTitle(":smiling_face_with_3_hearts: Love percentage :smiling_face_with_3_hearts:")
-                        .setDescription(user1.getAsMention() + " and " + user2.getAsMention() + " love " + lovePercent + "%")
-                        .setColor(0xfcb603);
-
+                        .setTitle("📜 Minecraft Pravidla")
+                        .setDescription("""
+                    1. 🔹 Respektuj ostatní hráče  
+                    2. 🔹 Zákaz hacků, exploitů, makra  
+                    3. 🔹 Nezničuj server lagy nebo griefem  
+                    4. 🔹 Nespamuj v chatu  
+                    5. 🔹 Negriefuj a nekradni v cizím landu  
+                    6. 🔹 Žádný nevhodný obsah (nahota, porno...)  
+                    7. 🔹 Žádná toxicita ani šikana  
+                    8. 🔹 Admin má poslední slovo  
+                    9. 🔹 Používej češtinu nebo angličtinu  
+                    10. 🔹 Zákaz auto-farem, gold/iron farm  
+                    11. 🔹 Nesmíš claimnout Nether, End nebo Spawn  
+                    12. 🔹 Válka jen skrze ticket a formulář  
+                    13. 🔹 Reklama je zakázaná  
+                    14. 🔹 Zákaz reálných náboženství a jmen  
+                    15. 🔹 Stavby jen středověké – žádný redstone vlaky atd.  
+                    16. 🔹 Nesmíš blokovat Angel Chest  
+                    17. 🔹 Nepinguj admin tým
+                    """)
+                        .setColor(0x2ECC71); // zelená
                 event.replyEmbeds(embed.build()).queue();
-            }
 
+            } else if (category.equalsIgnoreCase("valka")) {
+                EmbedBuilder embed = new EmbedBuilder()
+                        .setTitle("⚔️ Pravidla Války")
+                        .setDescription("""
+                    **Hlavní pravidla:**
+                    1. 🔹 Obranné body musí být přístupné  
+                    2. 🔹 Bitva musí být domluvena do 24h  
+                    3. 🔹 Grief pouze ve War Claimu  
+                    4. 🔹 Seznam bojovníků 30 min před bitvou  
+                    5. 🔹 Zákaz Proxy Claimu  
+                    6. 🔹 Obrana se musí odehrávat ve městě
+
+                    **Zakázané taktiky a stavby:**
+                    1. 🔹 Turtle-bunkry (méně než 2 vchody)  
+                    2. 🔹 Skybase a levitující mosty  
+                    3. 🔹 Lávové a vodní pasti  
+                    4. 🔹 TNT, dripstone a výbušniny  
+                    5. 🔹 Combat log v cizím claimu
+                    """)
+                        .setColor(0xe67e22); // oranžová
+                event.replyEmbeds(embed.build()).queue();
+
+            } else if (category.equalsIgnoreCase("discord")) {
+                EmbedBuilder embed = new EmbedBuilder()
+                        .setTitle("💬 Discord Pravidla")
+                        .setDescription("""
+                    1. 🔹 Buď slušný a respektuj ostatní  
+                    2. 🔹 Nespamuj zprávy, obrázky ani odkazy  
+                    3. 🔹 Reklama je bez povolení zakázaná  
+                    4. 🔹 Žádný NSFW nebo nevhodný obsah  
+                    5. 🔹 Přezdívky a avatary musí být vhodné  
+                    6. 🔹 Nepoužívej @everyone/@here  
+                    7. 🔹 Respektuj rozhodnutí adminů  
+                    8. 🔹 Piš do správných kanálů  
+                    9. 🔹 Používej češtinu nebo angličtinu  
+                    10. 🔹 Nesdílej osobní údaje nikoho
+                    """)
+                        .setColor(0x3498db); // modrá
+                event.replyEmbeds(embed.build()).queue();
+
+            } else {
+                event.reply("❌ Neznámá kategorie pravidel! Zadej `minecraft`, `valka` nebo `discord`.").setEphemeral(true).queue();
+            }
+        }
     }
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot())
-            return; //if person pinged the role but the person is bot it will dont show the message
+            return;
 
         Message message = event.getMessage();
         MessageChannel channel = message.getChannel();
 
-
-        if (message.getReferencedMessage() != null) { //if its reply ping it will dont count
+        if (message.getReferencedMessage() != null)
             return;
-        }
 
+        AtomicBoolean pingedStaff = new AtomicBoolean(false);
+        AtomicBoolean pingedApproved = new AtomicBoolean(false);
 
-        AtomicBoolean pingedStaff = new AtomicBoolean(false); // if in message was someobdy pinged
-
-        // will load the persons who has been pinged
-        for (net.dv8tion.jda.api.entities.User user : message.getMentions().getUsers()) {
-            // if person pinged himself it will not count lmao
-            if (user.getId().equals(event.getAuthor().getId())) {
+        for (User user : message.getMentions().getUsers()) {
+            if (user.getId().equals(event.getAuthor().getId()))
                 continue;
-            }
 
-            // if person has role and the role has the correct ID
             event.getGuild().retrieveMemberById(user.getId()).queue(member -> {
-                if (member.getRoles().stream().anyMatch(role -> role.getId().equals(STAFF_ROLE_ID))) {
-                    if (pingedStaff.compareAndSet(false, true)) {
-                        EmbedBuilder embed = new EmbedBuilder()
-                                .setTitle("Warning")
-                                .setDescription("Do not ping the **staff** members please :pleading_face:")
-                                .setFooter("This message was sent: " + messageCount + " times")
-                                .setColor(0xFF0000); // red color for warnign xd
+                boolean hasStaffRole = member.getRoles().stream().anyMatch(role -> role.getId().equals(STAFF_ROLE_ID));
+                boolean hasApprovedRole = member.getRoles().stream().anyMatch(role -> role.getId().equals(APPROVED_ROLE_ID));
+                boolean authorIsStaff = event.getMember().getRoles().stream()
+                        .anyMatch(role -> role.getId().equals(STAFF_ROLE_ID));
 
-                        channel.sendMessageEmbeds(embed.build()).queue();
-                    }
+                // Pokud někdo pingne staff člena a není sám staff → warning + 2min mute, zpráva se nemaže
+                if (hasStaffRole && !authorIsStaff && pingedStaff.compareAndSet(false, true)) {
+                    staffMessageCount++;
+                    saveStaffMessageCount();
+
+                    // Zprávu nesmažeme
+
+                    // Mute na 2 minuty
+                    event.getGuild().addRoleToMember(event.getMember(),
+                                    event.getGuild().getRoleById(MUTE_ROLE_ID))
+                            .reason("Pinged staff member")
+                            .queueAfter(1, TimeUnit.SECONDS);
+
+                    event.getGuild().removeRoleFromMember(event.getMember(),
+                                    event.getGuild().getRoleById(MUTE_ROLE_ID))
+                            .reason("Mute expired")
+                            .queueAfter(2, TimeUnit.MINUTES);
+
+                    // Warning embed
+                    EmbedBuilder embed = new EmbedBuilder()
+                            .setTitle("⚠️ Warning ⚠️")
+                            .setDescription("Do not ping the **staff** members please :pleading_face:\n\n" +
+                                    "You have been muted for 2 minutes")
+                            .setFooter("This warning has been sent " + staffMessageCount + " times")
+                            .setColor(0xFF0000);
+
+                    channel.sendMessageEmbeds(embed.build())
+                            .queue(msg -> msg.delete().queueAfter(30, TimeUnit.SECONDS));
                 }
 
-                if (pingedStaff.get()) {
-                    messageCount++;
-                    saveMessageCount(); // count +1 for the count
+                // Pokud pingne staff jiného staffa → ignoruj
+                if (hasStaffRole && authorIsStaff) {
+                    System.out.println("Staff pinged staff – ignored.");
+                }
+
+                // Approved ping embed (jen jednou)
+                if (hasApprovedRole && pingedApproved.compareAndSet(false, true)) {
+                    EmbedBuilder embed = new EmbedBuilder()
+                            .setTitle("Ping Approved ✅")
+                            .setDescription("Thank you for pinging this user!\nFeel free to ping him/her again \nif needed or not needed just ping again. :smiling_face_with_3_hearts:")
+                            .setColor(0x00FF00);
+                    channel.sendMessageEmbeds(embed.build()).queue();
                 }
             });
         }
     }
+
 
 
     private void sendRandomImage(MessageChannel channel, Path directory, String title, String description, SlashCommandInteractionEvent event) throws IOException {
@@ -234,13 +333,11 @@ public class Main extends ListenerAdapter {
                     .setColor(0xfcb603)
                     .setImage("attachment://" + image.getName());
 
-            // Use addFile instead of addFiles
             event.replyEmbeds(embed.build())
-                    .addFile(image) // Use addFile for a single file
+                    .addFile(image)
                     .queue();
         }
     }
-
 
     private void sendRandomText(MessageChannel channel, Path filePath, String title, String description, SlashCommandInteractionEvent event) throws IOException {
         if (!Files.exists(filePath)) {
@@ -248,16 +345,11 @@ public class Main extends ListenerAdapter {
             return;
         }
 
-        // idk but its working
         List<String> lines = Files.readAllLines(filePath);
         if (lines.isEmpty()) {
             event.reply("The file is empty.").queue();
             return;
         }
-
-
-        // komentar abych mel commity protoze mam rad commity a potrebuju stats frfr
-
 
         Random random = new Random();
         String randomText = lines.get(random.nextInt(lines.size()));
@@ -269,10 +361,6 @@ public class Main extends ListenerAdapter {
 
         event.replyEmbeds(embed.build()).queue();
     }
-
-
-
-
 
     public static void main(String[] args) throws LoginException {
         JDA jda = JDABuilder.createDefault("MTM0NjkwODA1MTU5MjE4NzkxNA.GJtfeW.cDpxk07XfLi6xRY70hdJ22PPy5btXARtvBFj4w")
@@ -292,15 +380,15 @@ public class Main extends ListenerAdapter {
                     Commands.slash("idk", "Show: ¯\\_(ツ)_/¯"),
                     Commands.slash("freenitro", "Give you free nitro frfr noscam 100% working"),
                     Commands.slash("meme", "Show random very funny meme"),
+                    Commands.slash("ping", "Ping"),
                     Commands.slash("guess", "Guess 1 or 2. If you guess correctly, you'll win!")
                             .addOption(OptionType.INTEGER, "number", "Your number", true),
-
-                    // Přidáno: LOVE command s dvěma uživateli
                     Commands.slash("love", "Show how many % they love each other")
                             .addOption(OptionType.USER, "user", "First user", true)
-                            .addOption(OptionType.USER, "user2", "Second user", true)
-            ).queue(); // <- DŮLEŽITÉ
+                            .addOption(OptionType.USER, "user2", "Second user", true),
+                    Commands.slash("rules", "Show rules of category")
+                            .addOption(OptionType.STRING, "typ", "Vyber kategorii pravidel", true)
+            ).queue();
         }
     }
-
 }
