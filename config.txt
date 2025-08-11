@@ -1,1 +1,0 @@
-token=TVŮJ_DISCORD_BOT_TOKEN
