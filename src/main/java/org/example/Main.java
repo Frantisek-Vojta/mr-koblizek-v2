@@ -26,7 +26,7 @@ public class Main extends ListenerAdapter {
                 .build();
     }
 
-    @Override
+    @Override //commit
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         commandManager.handle(event);
     }
