@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -16,8 +16,8 @@ import java.time.format.DateTimeFormatter;
 
 public class RoleUpdate extends ListenerAdapter {
 
-    private static final long IGNORED_ROLE_ID = 1337335252728676392L; // role, kterou ignorujeme
-    private static final long LOG_CHANNEL_ID = 1338111857541779570L; // kanál pro logy
+    private static final long IGNORED_ROLE_ID = 1337335252728676392L;
+    private static final long LOG_CHANNEL_ID = 1338111857541779570L;
 
     @Override
     public void onGuildMemberRoleAdd(GuildMemberRoleAddEvent event) {
@@ -29,7 +29,8 @@ public class RoleUpdate extends ListenerAdapter {
                     .limit(1)
                     .queue(entries -> {
                         AuditLogEntry entry = entries.isEmpty() ? null : entries.get(0);
-                        String executorName = (entry != null && entry.getUser() != null) ? entry.getUser().getAsTag() : "Unknown";
+                        String executorName = (entry != null && entry.getUser() != null) ?
+                                entry.getUser().getEffectiveName() : "Unknown";
                         sendRoleChangeEmbed(event.getGuild(), event.getUser().getName(), role.getName(), executorName, true, event.getUser().getEffectiveAvatarUrl());
                     });
         }
@@ -45,7 +46,8 @@ public class RoleUpdate extends ListenerAdapter {
                     .limit(1)
                     .queue(entries -> {
                         AuditLogEntry entry = entries.isEmpty() ? null : entries.get(0);
-                        String executorName = (entry != null && entry.getUser() != null) ? entry.getUser().getAsTag() : "Unknown";
+                        String executorName = (entry != null && entry.getUser() != null) ?
+                                entry.getUser().getEffectiveName() : "Unknown";
                         sendRoleChangeEmbed(event.getGuild(), event.getUser().getName(), role.getName(), executorName, false, event.getUser().getEffectiveAvatarUrl());
                     });
         }

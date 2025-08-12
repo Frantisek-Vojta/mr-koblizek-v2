@@ -43,7 +43,7 @@ public class DonutCommand implements Command {
                         .setColor(0xfcb603)
                         .setImage("attachment://" + image.getName())
                         .build())
-                .addFile(image)
+                .addFiles(FileUpload.fromData(Files.readAllBytes(image.toPath()), image.getName()))
                 .queue();
     }
 }

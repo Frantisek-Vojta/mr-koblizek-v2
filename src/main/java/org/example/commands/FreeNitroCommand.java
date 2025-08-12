@@ -43,7 +43,7 @@ public class FreeNitroCommand implements Command {
                         .setColor(0xfcb603)
                         .setImage("attachment://" + image.getName())
                         .build())
-                .addFile(image)
+                .addFiles(FileUpload.fromData(image))
                 .queue();
     }
 }
