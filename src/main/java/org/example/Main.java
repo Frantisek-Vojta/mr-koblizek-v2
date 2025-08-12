@@ -86,7 +86,8 @@ public class Main extends ListenerAdapter {
                                 new SubcommandData("buy", "Buy an item from the shop")
                                         .addOption(OptionType.STRING, "item", "Item to buy", true),
                                 new SubcommandData("baltop", "Show top 10 richest users"),
-                                new SubcommandData("balance", "Check your balance")
+                                new SubcommandData("balance", "Check your balance"),
+                                new SubcommandData("help", "Show command list")
                         )
         ).queue();
     }
