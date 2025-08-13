@@ -19,102 +19,85 @@ public class EconomyManager {
         this.database = new Database();
         this.shopManager = new ShopManager();
         this.jobManager = new JobManager(database);
-        registerCommands();
-        initializeDatabase();
+        initialize();
     }
 
-    private void initializeDatabase() {
+    private void initialize() {
         database.initialize();
+        registerCommands();
+        System.out.println("[Economy] Systém inicializován s " + commands.size() + " příkazy");
     }
 
     private void registerCommands() {
-        // Core commands
-        addCommand(new BalanceCommand(database));
-        addCommand(new BaltopCommand(database));
-        addCommand(new ProfileCommand(database, jobManager));
-        addCommand(new HelpCommand(database));
+        // Hlavní příkazy
+        registerCommand("balance", new BalanceCommand(database));
+        registerCommand("baltop", new BaltopCommand(database));
+        registerCommand("profile", new ProfileCommand(database, jobManager));
+        registerCommand("help", new HelpCommand(database));
 
-        // Job commands
-        addCommand(new JobCommand(database, jobManager));
+        // Práce
+        registerCommand("job", new JobCommand(database, jobManager));
+        registerCommand("work", new WorkCommand(database, jobManager));
 
-        // Money earning
-        addCommand(new WorkCommand(database, jobManager));
+        // Obchod
+        registerCommand("shop", new ShopCommand(shopManager));
+        registerCommand("buy", new BuyCommand(database, shopManager));
 
-        // Shop commands
-        addCommand(new ShopCommand(shopManager));
-        addCommand(new BuyCommand(database, shopManager));
-
-        // Gambling
-        addCommand(new SlotsCommand(database));
+        // Hazard
+        registerCommand("slots", new SlotsCommand(database));
     }
 
-    private void addCommand(EconomyCommand command) {
-        commands.put(command.getName().toLowerCase(), command);
+    private void registerCommand(String commandName, EconomyCommand command) {
+        commands.put(commandName.toLowerCase(), command);
+        System.out.println("[Economy] Registrován příkaz: " + commandName);
     }
 
     public void handleCommand(SlashCommandInteractionEvent event) {
         try {
-            // Verify this is an economy command
             if (!"e".equals(event.getName())) {
-                sendError(event, "Invalid command context. Use /e commands for economy system.");
+                sendError(event, "Špatný kontext příkazu. Použij /e příkady pro ekonomický systém.");
                 return;
             }
 
-            // Get the subcommand (or subcommand group + subcommand)
-            String subcommandPath = getFullCommandPath(event);
-
-            // Special case for help command
-            if ("help".equals(subcommandPath)) {
-                commands.get("help").execute(event);
+            String subcommand = event.getSubcommandName();
+            if (subcommand == null) {
+                sendError(event, "Chybí podpříkaz. Použij `/e help` pro dostupné příkazy.");
                 return;
             }
 
-            // Find and execute the command
-            EconomyCommand command = commands.get(subcommandPath);
+            // Aktualizace jména uživatele
+            updateUserData(event);
+
+            EconomyCommand command = commands.get(subcommand.toLowerCase());
             if (command != null) {
                 command.execute(event);
             } else {
-                sendError(event, "Unknown command. Use `/e help` for available commands.");
+                sendError(event, "Neznámý příkaz. Použij `/e help` pro dostupné příkazy.");
             }
         } catch (Exception e) {
             handleUnexpectedError(event, e);
         }
     }
 
-    private String getFullCommandPath(SlashCommandInteractionEvent event) {
-        // Handle subcommand groups (like "job select")
-        if (event.getSubcommandGroup() != null) {
-            return event.getSubcommandGroup() + " " + event.getSubcommandName();
-        }
-        // Handle simple subcommands (like "balance")
-        return event.getSubcommandName();
+    private void updateUserData(SlashCommandInteractionEvent event) {
+        String userId = event.getUser().getId();
+        String userName = event.getUser().getName();
+        database.updateUserName(userId, userName);
     }
 
     private void sendError(SlashCommandInteractionEvent event, String message) {
-        event.reply("❌ " + message)
-                .setEphemeral(true)
-                .queue();
+        event.reply("❌ " + message).setEphemeral(true).queue();
     }
 
     private void handleUnexpectedError(SlashCommandInteractionEvent event, Exception e) {
-        System.err.println("Error processing economy command:");
+        System.err.println("Chyba při zpracování příkazu:");
         e.printStackTrace();
-
-        event.reply("⚠️ An unexpected error occurred. Please try again later.")
+        event.reply("⚠️ Došlo k neočekávané chybě. Zkus to prosím později.")
                 .setEphemeral(true)
                 .queue();
     }
 
-    // Getters
     public Database getDatabase() {
         return database;
-    }
-
-    public ShopManager getShopManager() {
-        return shopManager;
-    }
-
-    public JobManager getJobManager() {
-        return jobManager;
     }
 }

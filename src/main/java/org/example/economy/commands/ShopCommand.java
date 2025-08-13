@@ -19,6 +19,7 @@ public class ShopCommand extends EconomyCommand {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
+
         EmbedBuilder embed = new EmbedBuilder()
             .setTitle("🛒 Shop")
             .setColor(0xEB459E);
