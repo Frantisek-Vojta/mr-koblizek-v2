@@ -1,67 +1,78 @@
 package org.example;
 
+import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.example.commands.*;
 import org.example.economy.EconomyManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class CommandManager {
+public class CommandManager extends ListenerAdapter {
     private final Map<String, Command> commands = new HashMap<>();
     private final EconomyManager economyManager;
 
     public CommandManager() {
-        // Inicializace EconomyManageru (registruje a načte data)
         this.economyManager = new EconomyManager();
 
-        // Běžné (neekonomické) příkazy
-        addCommand(new DonutCommand());
-        addCommand(new FreeNitroCommand());
-        addCommand(new GuessCommand());
-        addCommand(new HelpCommand());
-        addCommand(new PingCommand());
-        addCommand(new BotInfoCommand());
-        addCommand(new LoveCommand());
-        addCommand(new MemeCommand());
+        // Register regular commands
+        registerCommand(new DonutCommand());
+        registerCommand(new FreeNitroCommand());
+        registerCommand(new GuessCommand());
+        registerCommand(new HelpCommand());
+        registerCommand(new PingCommand());
+        registerCommand(new BotInfoCommand());
+        registerCommand(new LoveCommand());
+        registerCommand(new MemeCommand());
     }
 
-    private void addCommand(Command command) {
+    private void registerCommand(Command command) {
         commands.put(command.getName(), command);
     }
 
-    public void handle(SlashCommandInteractionEvent event) {
-        String name = event.getName();
+    @Override
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+        String commandName = event.getName();
 
-        // Ekonomické příkazy jsou pod slash příkazem "e" a řeší se přes EconomyManager
-        if ("e".equals(name)) {
-            try {
-                economyManager.handleCommand(event);
-            } catch (Exception e) {
-                event.reply("❌ An error occurred while executing the economy command.")
-                        .setEphemeral(true)
-                        .queue();
-                e.printStackTrace();
-            }
+        if ("e".equals(commandName)) {
+            handleEconomyCommand(event);
             return;
         }
 
-        // Ostatní (běžné) příkazy
-        Command command = commands.get(name);
+        Command command = commands.get(commandName);
         if (command != null) {
-            try {
-                command.execute(event);
-            } catch (Exception e) {
-                event.reply("❌ An error occurred while executing this command.")
-                        .setEphemeral(true)
-                        .queue();
-                e.printStackTrace();
-            }
+            executeCommandSafely(event, command);
         } else {
-            // Neznámý příkaz – vždy odpovědět, aby Discord nehlásil „application did not respond“
-            event.reply("❌ Unknown command: `" + name + "`")
+            event.reply("❌ Unknown command: `" + commandName + "`")
                     .setEphemeral(true)
                     .queue();
         }
+    }
+
+    private void handleEconomyCommand(SlashCommandInteractionEvent event) {
+        try {
+            economyManager.handleCommand(event);
+        } catch (Exception e) {
+            event.reply("❌ An error occurred while executing the economy command.")
+                    .setEphemeral(true)
+                    .queue();
+            e.printStackTrace();
+        }
+    }
+
+    private void executeCommandSafely(SlashCommandInteractionEvent event, Command command) {
+        try {
+            command.execute(event);
+        } catch (Exception e) {
+            event.reply("❌ An error occurred while executing this command.")
+                    .setEphemeral(true)
+                    .queue();
+            e.printStackTrace();
+        }
+    }
+
+    public void handle(SlashCommandInteractionEvent event) {
     }
 }

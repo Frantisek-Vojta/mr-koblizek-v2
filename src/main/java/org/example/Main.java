@@ -7,38 +7,70 @@ import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
+import net.dv8tion.jda.api.interactions.commands.build.*;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.example.commands.RoleUpdate;
+import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main extends ListenerAdapter {
     private final CommandManager commandManager = new CommandManager();
+
+    // WARNING: In production, use environment variables or config files
     private static final String BOT_TOKEN = "MTQwNDQxNzg2Nzk0ODIzMjc1NQ.GzoSOT.KlCsF5dx-miXacQiDZBYNzsqfnfCBCrEeukYl8";
 
     public static void main(String[] args) throws LoginException {
+        // Initialize bot with required intents
         JDA jda = JDABuilder.createDefault(BOT_TOKEN)
+                .enableIntents(
+                        GatewayIntent.MESSAGE_CONTENT,
+                        GatewayIntent.GUILD_MEMBERS, // Needed for member events
+                        GatewayIntent.GUILD_PRESENCES // Needed for some user info
+                )
                 .addEventListeners(
                         new Main(),
-                        new RoleUpdate()
+                        new RoleUpdate(),
+                        new CommandManager() // Add CommandManager as listener
                 )
                 .build();
     }
 
     @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         commandManager.handle(event);
     }
 
     @Override
-    public void onReady(ReadyEvent event) {
-        System.out.println("[SYSTEM] Bot is now online and registering commands...");
+    public void onReady(@NotNull ReadyEvent event) {
+        System.out.println("[SYSTEM] Bot is now online! Registering commands...");
+        registerGlobalCommands(event.getJDA());
+    }
 
-        // Job select option choices
-        OptionData jobOption = new OptionData(OptionType.STRING, "job", "Job to select", true)
+    private void registerGlobalCommands(JDA jda) {
+        List<CommandData> commands = new ArrayList<>();
+
+        // Basic commands
+        commands.add(Commands.slash("ping", "Check bot latency"));
+        commands.add(Commands.slash("help", "Show command list"));
+
+        // Economy system
+        commands.add(createEconomyCommand());
+
+        jda.updateCommands().addCommands(commands).queue(
+                success -> System.out.println("[SUCCESS] Registered all commands"),
+                error -> {
+                    System.err.println("[ERROR] Failed to register commands: " + error.getMessage());
+                    error.printStackTrace();
+                }
+        );
+    }
+
+    private CommandData createEconomyCommand() {
+        // Job selection options
+        OptionData jobOption = new OptionData(OptionType.STRING, "job", "Select your profession", true)
                 .addChoices(
                         new Command.Choice("Miner", "miner"),
                         new Command.Choice("Fisher", "fisher"),
@@ -47,53 +79,31 @@ public class Main extends ListenerAdapter {
                         new Command.Choice("CEO", "ceo")
                 );
 
-        // Subcommand group "job"
-        SubcommandGroupData jobGroup = new SubcommandGroupData("job", "Job management")
+        // Job management subcommands
+        SubcommandGroupData jobGroup = new SubcommandGroupData("job", "Manage your profession")
                 .addSubcommands(
-                        new SubcommandData("list", "List available jobs"),
-                        new SubcommandData("leave", "Leave your current job"),
-                        new SubcommandData("select", "Select a job")
-                                .addOptions(jobOption)
+                        new SubcommandData("list", "View available jobs"),
+                        new SubcommandData("select", "Choose a profession").addOptions(jobOption),
+                        new SubcommandData("leave", "Quit your current job")
                 );
 
-        // Update global commands
-        event.getJDA().updateCommands().addCommands(
-                // Basic commands
-                Commands.slash("donut", "Show random donut image"),
-                Commands.slash("freenitro", "Get free nitro (totally legit)"),
-                Commands.slash("guess", "Guess 1 or 2 to win")
-                        .addOption(OptionType.INTEGER, "number", "Your guess (1 or 2)", true),
-                Commands.slash("help", "Show command list"),
-                Commands.slash("ping", "Show bot latency"),
-                Commands.slash("botinfo", "Show bot information"),
-                Commands.slash("love", "Calculate love percentage")
-                        .addOption(OptionType.USER, "user", "First user", true)
-                        .addOption(OptionType.USER, "user2", "Second user", true),
-                Commands.slash("meme", "Show random meme"),
-
-                // Economy commands
-                Commands.slash("e", "Economy system commands")
-                        // subcommand groups (job)
-                        .addSubcommandGroups(jobGroup)
-                        // standalone subcommands
-                        .addSubcommands(
-                                new SubcommandData("profile", "Show your economy profile")
-                                        .addOption(OptionType.USER, "user", "User to view profile of", false),
-                                new SubcommandData("work", "Work to earn money"),
-                                new SubcommandData("slots", "Play slots")
-                                        .addOption(OptionType.INTEGER, "bet", "Amount to bet", true),
-                                new SubcommandData("shop", "View the shop"),
-                                new SubcommandData("buy", "Buy an item from the shop")
-                                        .addOption(OptionType.STRING, "item", "Item to buy", true),
-                                new SubcommandData("baltop", "Show top 10 richest users"),
-                                new SubcommandData("balance", "Check your balance"),
-                                new SubcommandData("help", "Show command list")
-                        )
-        ).queue();
+        // Main economy command
+        return Commands.slash("e", "Economy system commands")
+                .addSubcommandGroups(jobGroup)
+                .addSubcommands(
+                        new SubcommandData("work", "Earn money from your job"),
+                        new SubcommandData("balance", "Check your coin balance"),
+                        new SubcommandData("profile", "View player profile")
+                                .addOption(OptionType.USER, "user", "Player to inspect", false),
+                        new SubcommandData("shop", "Browse available items"),
+                        new SubcommandData("buy", "Purchase an item")
+                                .addOption(OptionType.STRING, "item", "Item ID to purchase", true),
+                        new SubcommandData("slots", "Play slot machine")
+                                .addOption(OptionType.INTEGER, "bet", "Amount to wager", true),
+                        new SubcommandData("baltop", "View wealth leaderboard")
+                );
     }
 }
-
-
 
 
 
