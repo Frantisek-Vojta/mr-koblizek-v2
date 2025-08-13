@@ -1,13 +1,23 @@
 {"users": [
   {
     "lastWork": "2025-08-13T10:20:02.038481100Z",
-    "coins": 1200,
+    "coins": 5000,
     "level": 1,
     "xp": 0,
     "userName": "urcitenealtka",
     "job": "CEO",
     "inventory": {},
     "userId": "1353095505097265174"
+  },
+  {
+    "lastWork": "-1000000000-01-01T00:00:00Z",
+    "coins": 1000,
+    "level": 1,
+    "xp": 0,
+    "userName": "kub94ek.1234",
+    "job": "UNEMPLOYED",
+    "inventory": {},
+    "userId": "1064940406560788540"
   },
   {
     "lastWork": "-1000000000-01-01T00:00:00Z",

@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.*;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.example.commands.RoleUpdate;
+import org.example.economy.EconomyManager;
 import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main extends ListenerAdapter {
+    private final EconomyManager economyManager = new EconomyManager();
     private final CommandManager commandManager = new CommandManager();
 
     // WARNING: In production, use environment variables or config files
@@ -40,7 +42,12 @@ public class Main extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        commandManager.handle(event);
+        // Handle economy commands
+        if (event.getName().equals("e")) {
+            economyManager.handleCommand(event);
+        } else {
+            commandManager.handle(event);
+        }
     }
 
     @Override
@@ -105,6 +112,11 @@ public class Main extends ListenerAdapter {
                 );
     }
 }
+
+
+
+
+
 
 
 

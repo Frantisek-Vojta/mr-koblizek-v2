@@ -13,6 +13,7 @@ public class UserData {
     private long coins;
     private JobType job;
     private int xp;
+    private int totalXp;
     private int level;
     private Instant lastWork;
     private Map<String, Integer> inventory;
@@ -23,6 +24,7 @@ public class UserData {
         this.coins = 1000;
         this.job = JobType.UNEMPLOYED;
         this.xp = 0;
+        this.totalXp = 0;
         this.level = 1;
         this.lastWork = Instant.MIN;
         this.inventory = new HashMap<>();
@@ -38,6 +40,8 @@ public class UserData {
     public void setJob(JobType job) { this.job = job; }
     public int getXp() { return xp; }
     public void setXp(int xp) { this.xp = xp; }
+    public int getTotalXp() { return totalXp; }
+    public void setTotalXp(int totalXp) { this.totalXp = totalXp; }
     public int getLevel() { return level; }
     public void setLevel(int level) { this.level = level; }
     public Instant getLastWork() { return lastWork; }
@@ -56,12 +60,31 @@ public class UserData {
         return false;
     }
 
+    public void addXp(int xpEarned) {
+        this.xp += xpEarned;
+        this.totalXp += xpEarned;
+        checkLevelUp();
+    }
+
+    private void checkLevelUp() {
+        int xpNeeded = level * 100;
+        if (xp >= xpNeeded) {
+            level++;
+            xp -= xpNeeded;
+        }
+    }
+
+    public boolean hasUnlockedJob(JobType job) {
+        return totalXp >= job.getRequiredXp();
+    }
+
     public static UserData fromJson(JSONObject json) {
         UserData user = new UserData(json.getString("userId"));
         user.setUserName(json.optString("userName", "Unknown"));
         user.setCoins(json.getLong("coins"));
         user.setJob(JobType.valueOf(json.getString("job")));
         user.setXp(json.getInt("xp"));
+        user.setTotalXp(json.optInt("totalXp", json.getInt("xp"))); // Backward compatibility
         user.setLevel(json.getInt("level"));
         user.setLastWork(Instant.parse(json.getString("lastWork")));
 
@@ -80,6 +103,7 @@ public class UserData {
         json.put("coins", coins);
         json.put("job", job.name());
         json.put("xp", xp);
+        json.put("totalXp", totalXp);
         json.put("level", level);
         json.put("lastWork", lastWork.toString());
 
@@ -90,8 +114,5 @@ public class UserData {
         json.put("inventory", inventoryJson);
 
         return json;
-    }
-
-    public void addXp(int xpEarned) {
     }
 }
