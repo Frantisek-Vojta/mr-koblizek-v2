@@ -28,56 +28,84 @@ public class EconomyManager {
     }
 
     private void registerCommands() {
+        // Core commands
         addCommand(new BalanceCommand(database));
         addCommand(new BaltopCommand(database));
-        addCommand(new WorkCommand(database, jobManager));
         addCommand(new ProfileCommand(database, jobManager));
+        addCommand(new HelpCommand(database));
+
+        // Job commands
         addCommand(new JobCommand(database, jobManager));
+
+        // Money earning
+        addCommand(new WorkCommand(database, jobManager));
+
+        // Shop commands
         addCommand(new ShopCommand(shopManager));
         addCommand(new BuyCommand(database, shopManager));
+
+        // Gambling
         addCommand(new SlotsCommand(database));
-        addCommand(new HelpCommand(database));
     }
 
     private void addCommand(EconomyCommand command) {
-        commands.put(command.getName(), command);
+        commands.put(command.getName().toLowerCase(), command);
     }
 
     public void handleCommand(SlashCommandInteractionEvent event) {
-        // Musí být slash příkaz "e"
-        if (!"e".equals(event.getName())) {
-            event.reply("❌ Invalid economy command context.").setEphemeral(true).queue();
-            return;
-        }
-
-        String sub = extractSubcommandName(event);
-        if (sub == null) {
-            event.reply("ℹ️ Use `/e <subcommand>` (e.g. `balance`, `work`, `job list`).").setEphemeral(true).queue();
-            return;
-        }
-
-        EconomyCommand command = commands.get(sub);
-        if (command != null) {
-            try {
-                command.execute(event);
-            } catch (Exception e) {
-                handleCommandError(event, e);
+        try {
+            // Verify this is an economy command
+            if (!"e".equals(event.getName())) {
+                sendError(event, "Invalid command context. Use /e commands for economy system.");
+                return;
             }
-        } else {
-            event.reply("❌ Unknown economy subcommand: `" + sub + "`. Try `/e balance`, `/e work`, `/e job list`.").setEphemeral(true).queue();
+
+            // Get the subcommand (or subcommand group + subcommand)
+            String subcommandPath = getFullCommandPath(event);
+
+            // Special case for help command
+            if ("help".equals(subcommandPath)) {
+                commands.get("help").execute(event);
+                return;
+            }
+
+            // Find and execute the command
+            EconomyCommand command = commands.get(subcommandPath);
+            if (command != null) {
+                command.execute(event);
+            } else {
+                sendError(event, "Unknown command. Use `/e help` for available commands.");
+            }
+        } catch (Exception e) {
+            handleUnexpectedError(event, e);
         }
     }
 
-    private String extractSubcommandName(SlashCommandInteractionEvent event) {
-        // Vrací např. "balance", "work", "slots", nebo u skupiny "job" vrací "list"/"select"/"leave"
+    private String getFullCommandPath(SlashCommandInteractionEvent event) {
+        // Handle subcommand groups (like "job select")
+        if (event.getSubcommandGroup() != null) {
+            return event.getSubcommandGroup() + " " + event.getSubcommandName();
+        }
+        // Handle simple subcommands (like "balance")
         return event.getSubcommandName();
     }
 
-    private void handleCommandError(SlashCommandInteractionEvent event, Exception e) {
-        event.reply("❌ An error occurred while executing this command.").setEphemeral(true).queue();
-        e.printStackTrace();
+    private void sendError(SlashCommandInteractionEvent event, String message) {
+        event.reply("❌ " + message)
+                .setEphemeral(true)
+                .queue();
     }
 
+    private void handleUnexpectedError(SlashCommandInteractionEvent event, Exception e) {
+        System.err.println("Error processing economy command:");
+        e.printStackTrace();
+
+        event.reply("⚠️ An unexpected error occurred. Please try again later.")
+                .setEphemeral(true)
+                .queue();
+    }
+
+    // Getters
     public Database getDatabase() {
         return database;
     }

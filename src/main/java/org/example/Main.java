@@ -100,7 +100,8 @@ public class Main extends ListenerAdapter {
                                 .addOption(OptionType.STRING, "item", "Item ID to purchase", true),
                         new SubcommandData("slots", "Play slot machine")
                                 .addOption(OptionType.INTEGER, "bet", "Amount to wager", true),
-                        new SubcommandData("baltop", "View wealth leaderboard")
+                        new SubcommandData("baltop", "View wealth leaderboard"),
+                        new SubcommandData("help", "Show command list")
                 );
     }
 }

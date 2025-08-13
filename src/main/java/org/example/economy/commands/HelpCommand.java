@@ -24,8 +24,7 @@ public class HelpCommand extends EconomyCommand {
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("💰 Economy System Help")
                 .setDescription("Here's how to use the economy system:")
-                .setColor(new Color(88, 101, 242))
-                .setThumbnail("https://i.imgur.com/7WdehG0.png");
+                .setColor(new Color(88, 101, 242));
 
         // Jobs Section
         StringBuilder jobsDesc = new StringBuilder();
@@ -37,7 +36,7 @@ public class HelpCommand extends EconomyCommand {
         }
 
         embed.addField("🚀 Getting Started",
-                "1. First select a job: `/e job select <job>` " + "✅\n" +
+                "1. First select a job: `/e job select <job>` " + "🚧\n" +
                         "2. Work every 6 hours: `/e work` " + "✅\n" +
                         "3. Check your progress: `/e profile` " + "✅", false);
 
@@ -57,7 +56,7 @@ public class HelpCommand extends EconomyCommand {
                         "`/e buy <item>` - Purchase an item " + "🚧", false);
 
         embed.addField("⚙️ Job Management",
-                "`/e job list` - View all jobs " + "✅\n" +
+                "`/e job list` - View all jobs " + "🚧\n" +
                         "`/e job select <job>` - Choose a job " + "🚧\n" +
                         "`/e job leave` - Quit your current job " + "🚧", false);
 
