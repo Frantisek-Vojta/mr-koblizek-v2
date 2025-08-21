@@ -24,9 +24,6 @@ public class SlotsCommand extends EconomyCommand {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        String userId = event.getUser().getId();
-        database.updateUserName(userId, event.getUser().getName());
-
         long bet = event.getOption("bet").getAsLong();
         UserData userData = database.getUserData(event.getUser().getId());
 

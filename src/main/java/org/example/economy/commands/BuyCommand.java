@@ -23,9 +23,6 @@ public class BuyCommand extends EconomyCommand {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        String userId = event.getUser().getId();
-        database.updateUserName(userId, event.getUser().getName());
-
         String itemId = event.getOption("item").getAsString();
         UserData userData = database.getUserData(event.getUser().getId());
         ShopItem item = shopManager.getItemById(itemId);

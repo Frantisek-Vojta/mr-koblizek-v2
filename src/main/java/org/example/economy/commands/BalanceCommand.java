@@ -20,9 +20,6 @@ public class BalanceCommand extends EconomyCommand {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        String userId = event.getUser().getId();
-        database.updateUserName(userId, event.getUser().getName());
-
         User user = event.getOption("user") != null ? 
             event.getOption("user").getAsUser() : event.getUser();
         
@@ -37,5 +34,4 @@ public class BalanceCommand extends EconomyCommand {
             
         event.replyEmbeds(embed.build()).queue();
     }
-
 }
