@@ -13,11 +13,19 @@ public class JobManager {
         this.database = database;
     }
 
-    public boolean canWork(UserData userData) {
+    // Zajistí, že uživatel má vždy alespoň MINER
+    public JobType ensureDefaultJob(UserData userData) {
         JobType job = userData.getJob();
         if (job == null || job == JobType.UNEMPLOYED) {
-            return false;
+            userData.setJob(JobType.MINER);
+            database.save();
+            return JobType.MINER;
         }
+        return job;
+    }
+
+    public boolean canWork(UserData userData) {
+        JobType job = ensureDefaultJob(userData);
 
         Instant lastWorkTime = userData.getLastWork();
         if (lastWorkTime.equals(Instant.MIN)) {
@@ -33,10 +41,7 @@ public class JobManager {
     }
 
     public String getCooldownMessage(UserData userData) {
-        JobType job = userData.getJob();
-        if (job == null || job == JobType.UNEMPLOYED) {
-            return "You don't have a job selected.";
-        }
+        JobType job = ensureDefaultJob(userData);
 
         Instant lastWorkTime = userData.getLastWork();
         if (lastWorkTime.equals(Instant.MIN)) {
@@ -54,10 +59,7 @@ public class JobManager {
     }
 
     public void work(UserData userData) {
-        JobType currentJob = userData.getJob();
-        if (currentJob == null || currentJob == JobType.UNEMPLOYED) {
-            return;
-        }
+        JobType currentJob = ensureDefaultJob(userData);
 
         int earnings = calculateEarnings(userData);
         userData.addCoins(earnings);
@@ -66,10 +68,7 @@ public class JobManager {
     }
 
     private int calculateEarnings(UserData userData) {
-        JobType job = userData.getJob();
-        if (job == null || job == JobType.UNEMPLOYED) {
-            return 0;
-        }
+        JobType job = ensureDefaultJob(userData);
         int level = Math.max(1, userData.getLevel());
         return job.getBaseSalary() * level;
     }

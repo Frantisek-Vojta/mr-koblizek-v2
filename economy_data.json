@@ -1,5 +1,6 @@
 {"users": [
   {
+    "totalXp": 0,
     "lastWork": "2025-08-13T10:20:02.038481100Z",
     "coins": 5000,
     "level": 1,
@@ -10,28 +11,53 @@
     "userId": "1353095505097265174"
   },
   {
+    "totalXp": 0,
+    "lastWork": "-1000000000-01-01T00:00:00Z",
+    "coins": 0,
+    "level": 1,
+    "xp": 0,
+    "userName": "mejimex",
+    "job": "MINER",
+    "inventory": {},
+    "userId": "937342905830481947"
+  },
+  {
+    "totalXp": 0,
     "lastWork": "-1000000000-01-01T00:00:00Z",
     "coins": 1000,
     "level": 1,
     "xp": 0,
+    "userName": "slappyjenej",
+    "job": "MINER",
+    "inventory": {},
+    "userId": "1220341970682122332"
+  },
+  {
+    "totalXp": 0,
+    "lastWork": "-1000000000-01-01T00:00:00Z",
+    "coins": 900,
+    "level": 1,
+    "xp": 0,
     "userName": "kub94ek.1234",
-    "job": "UNEMPLOYED",
+    "job": "MINER",
     "inventory": {},
     "userId": "1064940406560788540"
   },
   {
-    "lastWork": "-1000000000-01-01T00:00:00Z",
-    "coins": -1,
+    "totalXp": 12,
+    "lastWork": "2025-08-13T14:01:05.565312900Z",
+    "coins": 51,
     "level": 1,
-    "xp": 0,
-    "userName": "bury",
-    "job": "UNEMPLOYED",
+    "xp": 12,
+    "userName": "bury2__59269",
+    "job": "FISHER",
     "inventory": {},
     "userId": "1342995418102894705"
   },
   {
+    "totalXp": 22,
     "lastWork": "2025-08-13T08:48:13.256566600Z",
-    "coins": 4980,
+    "coins": 6459,
     "level": 1,
     "xp": 22,
     "userName": "xcel_cz",

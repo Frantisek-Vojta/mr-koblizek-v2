@@ -1,6 +1,5 @@
 package org.example;
 
-import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.example.commands.*;
@@ -16,8 +15,11 @@ public class CommandManager extends ListenerAdapter {
 
     public CommandManager() {
         this.economyManager = new EconomyManager();
+        registerCommands();
+    }
 
-        // Register regular commands
+    private void registerCommands() {
+        // Register all commands
         registerCommand(new DonutCommand());
         registerCommand(new FreeNitroCommand());
         registerCommand(new GuessCommand());
@@ -29,12 +31,12 @@ public class CommandManager extends ListenerAdapter {
     }
 
     private void registerCommand(Command command) {
-        commands.put(command.getName(), command);
+        commands.put(command.getName().toLowerCase(), command);
     }
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        String commandName = event.getName();
+        String commandName = event.getName().toLowerCase();
 
         if ("e".equals(commandName)) {
             handleEconomyCommand(event);
@@ -71,8 +73,5 @@ public class CommandManager extends ListenerAdapter {
                     .queue();
             e.printStackTrace();
         }
-    }
-
-    public void handle(SlashCommandInteractionEvent event) {
     }
 }

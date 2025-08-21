@@ -1,122 +1,226 @@
+// Java
 package org.example;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.session.ReadyEvent;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.*;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import org.example.commands.RoleUpdate;
-import org.example.economy.EconomyManager;
-import org.jetbrains.annotations.NotNull;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import org.example.economy.data.Database;
+import org.example.economy.data.UserData;
+import org.example.economy.jobs.JobManager;
+import org.example.economy.commands.WorkCommand;
+import org.example.economy.jobs.JobType;
 
-import javax.security.auth.login.LoginException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Properties;
 
-public class Main extends ListenerAdapter {
-    private final EconomyManager economyManager = new EconomyManager();
-    private final CommandManager commandManager = new CommandManager();
+public class Main {
 
-    // WARNING: In production, use environment variables or config files
-    private static final String BOT_TOKEN = "MTQwNDQxNzg2Nzk0ODIzMjc1NQ.GzoSOT.KlCsF5dx-miXacQiDZBYNzsqfnfCBCrEeukYl8";
+    // Volitelně: nastav svůj token přímo sem (jinak používej ENV/VM/args/config):
+    private static final String TOKEN_IN_CODE = "MTQwNDQxNzg2Nzk0ODIzMjc1NQ.GdBIMc.Fbuh9YZWjLSz_y0Mr_Y3pM2cS7god3JzCuTcp4";
 
-    public static void main(String[] args) throws LoginException {
-        // Initialize bot with required intents
-        JDA jda = JDABuilder.createDefault(BOT_TOKEN)
-                .enableIntents(
-                        GatewayIntent.MESSAGE_CONTENT,
-                        GatewayIntent.GUILD_MEMBERS, // Needed for member events
-                        GatewayIntent.GUILD_PRESENCES // Needed for some user info
-                )
-                .addEventListeners(
-                        new Main(),
-                        new RoleUpdate(),
-                        new CommandManager() // Add CommandManager as listener
-                )
-                .build();
+    public static void main(String[] args) throws Exception {
+        String token = resolveToken(args);
+
+        if (token == null || token.isBlank() || "<VÁŠ_DISCORD_BOT_TOKEN>".equals(TOKEN_IN_CODE)) {
+            System.err.println("Chyba: Discord token nebyl nalezen nebo je placeholder.");
+            System.err.println("Možnosti:");
+            System.err.println("  - Nastav TOKEN_IN_CODE ve třídě Main na tvůj token.");
+            System.err.println("  - Nebo použij ENV: DISCORD_TOKEN=...");
+            System.err.println("  - Nebo VM option: -Ddiscord.token=...");
+            System.err.println("  - Nebo argument: --token=... / -t ... / args[0]");
+            System.exit(1);
+            return;
+        }
+
+        // Infrastruktura
+        Database database = new Database();
+        JobManager jobManager = new JobManager(database);
+
+        // MIGRACE: všem existujícím profilům s UNEMPLOYED/null nastav MINER
+        migrateExistingProfiles(database, jobManager);
+
+        WorkCommand workCommand = new WorkCommand(database, jobManager);
+
+        // JDA
+        JDABuilder builder = JDABuilder.createDefault(token)
+                .enableIntents(GatewayIntent.GUILD_MEMBERS)
+                .setActivity(Activity.playing("economy"));
+        builder.addEventListeners(new SlashListener(workCommand));
+
+        JDA jda = builder.build();
+        jda.awaitReady();
+        System.out.println("Bot je online jako: " + jda.getSelfUser().getAsTag());
+
+        // Registrace slash commandů
+        String guildId = System.getenv("GUILD_ID"); // volitelné pro rychlou registraci v jedné guildě
+        if (guildId != null && !guildId.isBlank() && jda.getGuildById(guildId) != null) {
+            jda.getGuildById(guildId)
+               .updateCommands()
+               .addCommands(Commands.slash("work", "Odpracuj směnu a získej odměnu a XP"))
+               .queue(
+                   s -> System.out.println("Guild slash commands zaregistrovány pro guildId=" + guildId),
+                   e -> System.err.println("Registrace guild commands selhala: " + e.getMessage())
+               );
+        } else {
+            jda.updateCommands()
+               .addCommands(Commands.slash("work", "Odpracuj směnu a získej odměnu a XP"))
+               .queue(
+                   s -> System.out.println("Globální slash commands zaregistrovány"),
+                   e -> System.err.println("Registrace global commands selhala: " + e.getMessage())
+               );
+        }
+
+        // Graceful shutdown
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                System.out.println("Ukládám databázi a vypínám bota...");
+                database.save();
+                jda.shutdown();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }));
     }
 
-    @Override
-    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        // Handle economy commands
-        if (event.getName().equals("e")) {
-            economyManager.handleCommand(event);
-        } else {
-            commandManager.handle(event);
+    // Listener pro /work
+    private static class SlashListener extends ListenerAdapter {
+        private final WorkCommand workCommand;
+
+        public SlashListener(WorkCommand workCommand) {
+            this.workCommand = workCommand;
+        }
+
+        @Override
+        public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+            if ("work".equalsIgnoreCase(event.getName())) {
+                try {
+                    workCommand.execute(event);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    event.reply("Nastala neočekávaná chyba při zpracování příkazu.").setEphemeral(true).queue();
+                }
+            }
         }
     }
 
-    @Override
-    public void onReady(@NotNull ReadyEvent event) {
-        System.out.println("[SYSTEM] Bot is now online! Registering commands...");
-        registerGlobalCommands(event.getJDA());
-    }
+    // Token resolver: 1) TOKEN_IN_CODE -> 2) ENV -> 3) VM prop -> 4) config.properties -> 5) args
+    private static String resolveToken(String[] args) {
+        if (TOKEN_IN_CODE != null && !TOKEN_IN_CODE.isBlank() && !"<VÁŠ_DISCORD_BOT_TOKEN>".equals(TOKEN_IN_CODE)) {
+            return TOKEN_IN_CODE;
+        }
+        String env = System.getenv("DISCORD_TOKEN");
+        if (env != null && !env.isBlank()) return env;
 
-    private void registerGlobalCommands(JDA jda) {
-        List<CommandData> commands = new ArrayList<>();
+        String prop = System.getProperty("discord.token");
+        if (prop != null && !prop.isBlank()) return prop;
 
-        // Basic commands
-        commands.add(Commands.slash("ping", "Check bot latency"));
-        commands.add(Commands.slash("help", "Show command list"));
-
-        // Economy system
-        commands.add(createEconomyCommand());
-
-        jda.updateCommands().addCommands(commands).queue(
-                success -> System.out.println("[SUCCESS] Registered all commands"),
-                error -> {
-                    System.err.println("[ERROR] Failed to register commands: " + error.getMessage());
-                    error.printStackTrace();
+        try {
+            Path cfg = Path.of("config.properties");
+            if (Files.exists(cfg)) {
+                try (InputStream in = Files.newInputStream(cfg)) {
+                    Properties p = new Properties();
+                    p.load(in);
+                    String cfgToken = p.getProperty("discord.token");
+                    if (cfgToken != null && !cfgToken.isBlank()) return cfgToken;
                 }
-        );
+            }
+        } catch (IOException ignored) {}
+
+        if (args != null && args.length > 0) {
+            for (int i = 0; i < args.length; i++) {
+                String a = args[i];
+                if (a.startsWith("--token=")) return a.substring("--token=".length());
+                if ("-t".equals(a) && i + 1 < args.length) return args[i + 1];
+            }
+            if (!args[0].isBlank()) return args[0];
+        }
+        return null;
     }
 
-    private CommandData createEconomyCommand() {
-        // Job selection options
-        OptionData jobOption = new OptionData(OptionType.STRING, "job", "Select your profession", true)
-                .addChoices(
-                        new Command.Choice("Miner", "miner"),
-                        new Command.Choice("Fisher", "fisher"),
-                        new Command.Choice("Lumberjack", "lumberjack"),
-                        new Command.Choice("Programmer", "programmer"),
-                        new Command.Choice("CEO", "ceo")
-                );
+    // MIGRACE EXISTUJÍCÍCH PROFILŮ:
+    // Bez ohledu na to, jak Database uchovává data, pokusíme se najít kolekci uživatelů přes reflexi.
+    // - Pokud najde Collection<UserData>, projde ji.
+    // - Pokud najde Map<*, UserData>, projde values().
+    // Každému uživateli s job==null nebo UNEMPLOYED nastaví MINER a uloží změny.
+    @SuppressWarnings("unchecked")
+    private static void migrateExistingProfiles(Database database, JobManager jobManager) {
+        int migrated = 0;
 
-        // Job management subcommands
-        SubcommandGroupData jobGroup = new SubcommandGroupData("job", "Manage your profession")
-                .addSubcommands(
-                        new SubcommandData("list", "View available jobs"),
-                        new SubcommandData("select", "Choose a profession").addOptions(jobOption),
-                        new SubcommandData("leave", "Quit your current job")
-                );
+        try {
+            // Zkus najít metody, které by mohly vracet uživatele
+            Method[] methods = database.getClass().getMethods();
+            for (Method m : methods) {
+                if (m.getParameterCount() == 0) {
+                    String name = m.getName().toLowerCase();
+                    boolean maybeUsers = name.contains("all") || name.contains("users") || name.contains("values") || name.contains("list");
+                    if (!maybeUsers) continue;
 
-        // Main economy command
-        return Commands.slash("e", "Economy system commands")
-                .addSubcommandGroups(jobGroup)
-                .addSubcommands(
-                        new SubcommandData("work", "Earn money from your job"),
-                        new SubcommandData("balance", "Check your coin balance"),
-                        new SubcommandData("profile", "View player profile")
-                                .addOption(OptionType.USER, "user", "Player to inspect", false),
-                        new SubcommandData("shop", "Browse available items"),
-                        new SubcommandData("buy", "Purchase an item")
-                                .addOption(OptionType.STRING, "item", "Item ID to purchase", true),
-                        new SubcommandData("slots", "Play slot machine")
-                                .addOption(OptionType.INTEGER, "bet", "Amount to wager", true),
-                        new SubcommandData("baltop", "View wealth leaderboard"),
-                        new SubcommandData("help", "Show command list")
-                );
+                    Object result = null;
+                    try {
+                        result = m.invoke(database);
+                    } catch (Throwable ignored) {
+                        continue;
+                    }
+                    if (result == null) continue;
+
+                    // Collection<UserData>
+                    if (result instanceof Collection<?> col) {
+                        for (Object o : col) {
+                            if (o instanceof UserData ud) {
+                                if (fixJobIfUnemployed(ud)) {
+                                    migrated++;
+                                }
+                            }
+                        }
+                        continue; // zkusí ještě další metody, ale už máme část migrováno
+                    }
+
+                    // Map<?, UserData> -> values()
+                    if (result instanceof Map<?, ?> map) {
+                        for (Object v : map.values()) {
+                            if (v instanceof UserData ud) {
+                                if (fixJobIfUnemployed(ud)) {
+                                    migrated++;
+                                }
+                            }
+                        }
+                        continue;
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            System.err.println("Migrace profilů: došlo k chybě: " + t.getMessage());
+        }
+
+        if (migrated > 0) {
+            try {
+                database.save();
+            } catch (Throwable t) {
+                System.err.println("Ukládání po migraci selhalo: " + t.getMessage());
+            }
+        }
+        System.out.println("Migrace profilů dokončena. Upraveno uživatelů: " + migrated);
+    }
+
+    // Pomocná metoda: pokud je job null/UNEMPLOYED, nastav MINER a vrať true (byla provedena změna)
+    private static boolean fixJobIfUnemployed(UserData userData) {
+        try {
+            var job = userData.getJob();
+            if (job == null || job == JobType.UNEMPLOYED) {
+                userData.setJob(JobType.MINER);
+                return true;
+            }
+        } catch (Throwable ignored) {}
+        return false;
     }
 }
-
-
-
-
-
-
-
-

@@ -31,16 +31,12 @@ public class WorkCommand extends EconomyCommand {
         String userId = event.getUser().getId();
         database.updateUserName(userId, event.getUser().getName());
         UserData userData = database.getUserData(event.getUser().getId());
+        // Zajistíme výchozí job MINER, pokud uživatel žádný nemá / je UNEMPLOYED
+        JobType job = jobManager.ensureDefaultJob(userData);
         Instant now = Instant.now();
 
         if (!canWork(userData, now)) {
             event.reply("You need to wait before working again! Check `/e profile` for cooldown.").setEphemeral(true).queue();
-            return;
-        }
-
-        JobType job = userData.getJob();
-        if (job == null || job == JobType.UNEMPLOYED) {
-            event.reply("You don't have a job! Use `/e job list` to find one.").setEphemeral(true).queue();
             return;
         }
 
@@ -63,11 +59,13 @@ public class WorkCommand extends EconomyCommand {
     }
 
     private boolean canWork(UserData userData, Instant now) {
+        // ensure výchozí job kvůli cooldownu
+        JobType job = jobManager.ensureDefaultJob(userData);
         Instant lastWork = userData.getLastWork();
         if (lastWork.equals(Instant.MIN)) {
             return true;
         }
-        Duration cooldown = jobManager.getCooldown(userData.getJob());
+        Duration cooldown = jobManager.getCooldown(job);
         return now.isAfter(lastWork.plus(cooldown));
     }
 
