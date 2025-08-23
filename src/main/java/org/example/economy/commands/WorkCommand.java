@@ -9,12 +9,10 @@ import org.example.economy.jobs.JobType;
 
 import java.time.Instant;
 import java.time.Duration;
-import java.util.Random;
 
 public class WorkCommand extends EconomyCommand {
     private final Database database;
     private final JobManager jobManager;
-    private final Random random = new Random();
 
     public WorkCommand(Database database, JobManager jobManager) {
         this.database = database;
@@ -43,7 +41,7 @@ public class WorkCommand extends EconomyCommand {
         }
 
         int earnings = calculateEarnings(userData);
-        int xpEarned = 5 + random.nextInt(16); // Random XP between 5-20
+        int xpEarned = 10 + userData.getLevel();
 
         userData.addCoins(earnings);
         userData.addXp(xpEarned);

@@ -70,12 +70,6 @@ public class JobCommand extends EconomyCommand {
             return "✅ Currently employed";
         }
 
-        if (!userData.hasUnlockedJob(job)) {
-            int xpNeeded = job.getRequiredXp() - userData.getTotalXp();
-            return String.format("🔒 Requires %,d more XP (%,d/%,d)",
-                    xpNeeded, userData.getTotalXp(), job.getRequiredXp());
-        }
-
         if (job == JobType.CEO && userData.getLevel() < 20) {
             return "🔒 Requires Level 20";
         }
@@ -93,12 +87,6 @@ public class JobCommand extends EconomyCommand {
 
             if (newJob == JobType.UNEMPLOYED) {
                 event.reply("❌ You can't select 'Unemployed'! Use `/e job leave` instead.").queue();
-                return;
-            }
-
-            if (!userData.hasUnlockedJob(newJob)) {
-                event.reply(String.format("❌ You need %,d total XP to unlock this job! (You have %,d XP)",
-                        newJob.getRequiredXp(), userData.getTotalXp())).queue();
                 return;
             }
 

@@ -1,25 +1,21 @@
 package org.example.economy.jobs;
-
-import java.time.Duration;
-
+import java.time.Duration;  // Add this import
 public enum JobType {
-    UNEMPLOYED("Unemployed", 0, Duration.ZERO, 0),
-    MINER("Miner", 50, Duration.ofHours(6), 0),
-    FISHER("Fisher", 40, Duration.ofHours(6), 100),
-    LUMBERJACK("Lumberjack", 45, Duration.ofHours(6), 200),
-    PROGRAMMER("Programmer", 80, Duration.ofHours(6), 300),
-    CEO("CEO", 200, Duration.ofHours(6), 500);
+    UNEMPLOYED("Unemployed", 0, Duration.ZERO),
+    MINER("Miner", 50, Duration.ofHours(6)),
+    FISHER("Fisher", 40, Duration.ofHours(6)),
+    LUMBERJACK("Lumberjack", 45, Duration.ofHours(6)),
+    PROGRAMMER("Programmer", 80, Duration.ofHours(6)),
+    CEO("CEO", 200, Duration.ofHours(6));
 
     private final String displayName;
     private final int baseSalary;
     private final Duration cooldown;
-    private final int requiredXp;
 
-    JobType(String displayName, int baseSalary, Duration cooldown, int requiredXp) {
+    JobType(String displayName, int baseSalary, Duration cooldown) {
         this.displayName = displayName;
         this.baseSalary = baseSalary;
         this.cooldown = cooldown;
-        this.requiredXp = requiredXp;
     }
 
     public String getDisplayName() {
@@ -34,7 +30,5 @@ public enum JobType {
         return cooldown;
     }
 
-    public int getRequiredXp() {
-        return requiredXp;
+    public int getRequiredXp() {return 100;}
     }
-}

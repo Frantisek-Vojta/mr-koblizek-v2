@@ -13,9 +13,11 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class RoleUpdate extends ListenerAdapter {
 
@@ -24,67 +26,91 @@ public class RoleUpdate extends ListenerAdapter {
 
     @Override
     public void onGuildMemberRoleAdd(@NotNull GuildMemberRoleAddEvent event) {
-        handleRoleChange(event.getGuild(), event.getRoles(),
-                event.getUser().getName(), true, event.getUser().getEffectiveAvatarUrl());
+        // Přidáme malé zpoždění pro audit logy
+        event.getGuild().retrieveAuditLogs().type(ActionType.MEMBER_ROLE_UPDATE).limit(5).queueAfter(1, TimeUnit.SECONDS, entries -> {
+            handleRoleChange(event.getGuild(), event.getRoles(), event.getUser(), true, entries);
+        });
     }
 
     @Override
     public void onGuildMemberRoleRemove(@NotNull GuildMemberRoleRemoveEvent event) {
-        handleRoleChange(event.getGuild(), event.getRoles(),
-                event.getUser().getName(), false, event.getUser().getEffectiveAvatarUrl());
+        // Přidáme malé zpoždění pro audit logy
+        event.getGuild().retrieveAuditLogs().type(ActionType.MEMBER_ROLE_UPDATE).limit(5).queueAfter(1, TimeUnit.SECONDS, entries -> {
+            handleRoleChange(event.getGuild(), event.getRoles(), event.getUser(), false, entries);
+        });
     }
 
-    private void handleRoleChange(Guild guild, List<Role> roles, String userName, boolean added, String avatarUrl) {
-        for (Role role : roles) {
-            if (role.getIdLong() == IGNORED_ROLE_ID) return;
-
-            if (!guild.getSelfMember().hasPermission(Permission.VIEW_AUDIT_LOGS)) {
-                System.out.println("[ERROR] Bot lacks VIEW_AUDIT_LOGS permission!");
-                return;
-            }
-
-            guild.retrieveAuditLogs()
-                    .type(ActionType.MEMBER_ROLE_UPDATE)
-                    .limit(1)
-                    .queue(entries -> {
-                        AuditLogEntry entry = entries.isEmpty() ? null : entries.get(0);
-                        String executorName = (entry != null && entry.getUser() != null)
-                                ? entry.getUser().getEffectiveName()
-                                : "System";
-                        sendRoleEmbed(guild, userName, role.getName(), executorName, added, avatarUrl);
-                    }, error -> {
-                        System.out.println("[ERROR] Failed to fetch audit logs: " + error.getMessage());
-                    });
+    private void handleRoleChange(Guild guild, List<Role> roles, net.dv8tion.jda.api.entities.User targetUser, boolean added, List<AuditLogEntry> auditLogEntries) {
+        // Nejprve zkontrolujte ignorované role
+        if (roles.stream().anyMatch(role -> role.getIdLong() == IGNORED_ROLE_ID)) {
+            return;
         }
+
+        // Zkontrolujte oprávnění pro audit logy
+        if (!guild.getSelfMember().hasPermission(Permission.VIEW_AUDIT_LOGS)) {
+            sendRoleEmbed(guild, targetUser, roles, "Unknown (No Permission)", added);
+            return;
+        }
+
+        // Najděte nejnovější relevantní audit log entry
+        AuditLogEntry relevantEntry = null;
+        for (AuditLogEntry entry : auditLogEntries) {
+            if (entry.getTargetIdLong() == targetUser.getIdLong()) {
+                relevantEntry = entry;
+                break;
+            }
+        }
+
+        String executorName = "Unknown";
+        if (relevantEntry != null && relevantEntry.getUser() != null) {
+            executorName = relevantEntry.getUser().getAsTag();
+        }
+
+        sendRoleEmbed(guild, targetUser, roles, executorName, added);
     }
 
-    private void sendRoleEmbed(Guild guild, String targetUser, String roleName,
-                               String executorName, boolean added, String avatarUrl) {
+    private void sendRoleEmbed(Guild guild, net.dv8tion.jda.api.entities.User targetUser, List<Role> roles, String executorName, boolean added) {
         TextChannel logChannel = guild.getTextChannelById(LOG_CHANNEL_ID);
         if (logChannel == null) {
             System.out.println("[ERROR] Log channel not found!");
             return;
         }
 
-        String description = added
-                ? String.format("The **%s** role was added to user **%s**\nWhen: %s\nBy: %s",
-                roleName, targetUser,
-                OffsetDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")),
-                executorName)
-                : String.format("The **%s** role was removed from user **%s**\nWhen: %s\nBy: %s",
-                roleName, targetUser,
-                OffsetDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")),
-                executorName);
+        // Zkontrolujte oprávnění pro odesílání zpráv
+        if (!guild.getSelfMember().hasPermission(logChannel, Permission.MESSAGE_SEND)) {
+            System.out.println("[ERROR] Bot cannot send messages in log channel!");
+            return;
+        }
+
+        // Vytvořte popis s informacemi o všech změněných rolích
+        StringBuilder roleList = new StringBuilder();
+        for (Role role : roles) {
+            if (role.getIdLong() != IGNORED_ROLE_ID) {
+                roleList.append(role.getAsMention()).append(", ");
+            }
+        }
+
+        // Odstraníme poslední čárku a mezeru
+        if (roleList.length() > 0) {
+            roleList.setLength(roleList.length() - 2);
+        }
+
+        String action = added ? "added to" : "removed from";
+        String description = String.format("**Roles %s**: %s\n**User**: %s\n**By**: %s\n**When**: %s",
+                action, roleList.toString(), targetUser.getAsMention(), executorName,
+                OffsetDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")));
 
         EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("Rank Movement")
+                .setTitle(added ? "✅ Roles Added" : "❌ Roles Removed")
                 .setDescription(description)
                 .setColor(added ? Color.GREEN : Color.RED)
-                .setThumbnail(avatarUrl);
+                .setThumbnail(targetUser.getEffectiveAvatarUrl())
+                .setFooter("Guild: " + guild.getName(), guild.getIconUrl())
+                .setTimestamp(Instant.now());
 
-        logChannel.sendMessageEmbeds(embed.build())
-                .queue(success -> {}, error -> {
-                    System.out.println("[ERROR] Failed to send embed: " + error.getMessage());
-                });
+        logChannel.sendMessageEmbeds(embed.build()).queue(
+                success -> System.out.println("[INFO] Role change logged successfully"),
+                error -> System.out.println("[ERROR] Failed to send embed: " + error.getMessage())
+        );
     }
 }
