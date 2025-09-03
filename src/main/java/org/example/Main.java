@@ -2,7 +2,6 @@ package org.example;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -10,7 +9,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.*;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.example.commands.RoleUpdate;
-import org.example.economy.EconomyManager;
 import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
@@ -18,36 +16,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main extends ListenerAdapter {
-    private final EconomyManager economyManager = new EconomyManager();
-    private final CommandManager commandManager = new CommandManager();
 
-    // WARNING: In production, use environment variables or config files
-    private static final String BOT_TOKEN = "MTQwNDQxNzg2Nzk0ODIzMjc1NQ.GzoSOT.KlCsF5dx-miXacQiDZBYNzsqfnfCBCrEeukYl8";
+    // POZOR: token nikdy nedávej do kódu. Použij např. proměnnou prostředí.
+    private static final String BOT_TOKEN = "MTQwNDQxNzg2Nzk0ODIzMjc1NQ.GvYfko.3uTqAD07CbwARPdExFpOr3q1bB1ovLID4ZAJnc";
 
     public static void main(String[] args) throws LoginException {
-        // Initialize bot with required intents
+        CommandManager commandManager = new CommandManager();
+
         JDA jda = JDABuilder.createDefault(BOT_TOKEN)
                 .enableIntents(
                         GatewayIntent.MESSAGE_CONTENT,
-                        GatewayIntent.GUILD_MEMBERS, // Needed for member events
-                        GatewayIntent.GUILD_PRESENCES // Needed for some user info
+                        GatewayIntent.GUILD_MEMBERS,
+                        GatewayIntent.GUILD_PRESENCES
                 )
                 .addEventListeners(
-                        new Main(),
+                        new Main(),         // onReady + registrace příkazů
                         new RoleUpdate(),
-                        new CommandManager() // Add CommandManager as listener
+                        commandManager      // jediná instance CommandManageru
                 )
                 .build();
-    }
-
-    @Override
-    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        // Handle economy commands
-        if (event.getName().equals("e")) {
-            economyManager.handleCommand(event);
-        } else {
-            commandManager.handle(event);
-        }
     }
 
     @Override
@@ -76,7 +63,6 @@ public class Main extends ListenerAdapter {
     }
 
     private CommandData createEconomyCommand() {
-        // Job selection options
         OptionData jobOption = new OptionData(OptionType.STRING, "job", "Select your profession", true)
                 .addChoices(
                         new Command.Choice("Miner", "miner"),
@@ -86,7 +72,6 @@ public class Main extends ListenerAdapter {
                         new Command.Choice("CEO", "ceo")
                 );
 
-        // Job management subcommands
         SubcommandGroupData jobGroup = new SubcommandGroupData("job", "Manage your profession")
                 .addSubcommands(
                         new SubcommandData("list", "View available jobs"),
@@ -94,7 +79,6 @@ public class Main extends ListenerAdapter {
                         new SubcommandData("leave", "Quit your current job")
                 );
 
-        // Main economy command
         return Commands.slash("e", "Economy system commands")
                 .addSubcommandGroups(jobGroup)
                 .addSubcommands(
@@ -112,11 +96,3 @@ public class Main extends ListenerAdapter {
                 );
     }
 }
-
-
-
-
-
-
-
-

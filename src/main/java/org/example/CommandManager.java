@@ -1,6 +1,5 @@
 package org.example;
 
-import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.example.commands.*;
@@ -17,7 +16,6 @@ public class CommandManager extends ListenerAdapter {
     public CommandManager() {
         this.economyManager = new EconomyManager();
 
-        // Register regular commands
         registerCommand(new DonutCommand());
         registerCommand(new FreeNitroCommand());
         registerCommand(new GuessCommand());
@@ -53,6 +51,7 @@ public class CommandManager extends ListenerAdapter {
 
     private void handleEconomyCommand(SlashCommandInteractionEvent event) {
         try {
+            // Důležité: odpovědět do 3 s (případně deferReply)
             economyManager.handleCommand(event);
         } catch (Exception e) {
             event.reply("❌ An error occurred while executing the economy command.")
@@ -64,6 +63,7 @@ public class CommandManager extends ListenerAdapter {
 
     private void executeCommandSafely(SlashCommandInteractionEvent event, Command command) {
         try {
+            // Důležité: command.execute by měl buď reply(), nebo deferReply() okamžitě
             command.execute(event);
         } catch (Exception e) {
             event.reply("❌ An error occurred while executing this command.")
@@ -73,6 +73,8 @@ public class CommandManager extends ListenerAdapter {
         }
     }
 
+    // Volitelně: pokud bys chtěl explicitně delegovat z jiných míst
     public void handle(SlashCommandInteractionEvent event) {
+        onSlashCommandInteraction(event);
     }
 }
