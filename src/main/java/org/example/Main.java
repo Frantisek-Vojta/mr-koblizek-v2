@@ -18,9 +18,9 @@ import java.util.List;
 public class Main extends ListenerAdapter {
 
     // POZOR: token nikdy nedávej do kódu. Použij např. proměnnou prostředí.
-    private static final String BOT_TOKEN = "MTQwNDQxNzg2Nzk0ODIzMjc1NQ.GvYfko.3uTqAD07CbwARPdExFpOr3q1bB1ovLID4ZAJnc";
+    private static final String BOT_TOKEN = "MTQwNDQxNzg2Nzk0ODIzMjc1NQ.Gvdyov.w16UhKxmEe6xmdHB1C2upnGeTjN3z0aDZNb0gk";
 
-    public static void main(String[] args) throws LoginException {
+    public static void main(String[] args) throws LoginException, InterruptedException {
         CommandManager commandManager = new CommandManager();
 
         JDA jda = JDABuilder.createDefault(BOT_TOKEN)
@@ -29,12 +29,18 @@ public class Main extends ListenerAdapter {
                         GatewayIntent.GUILD_MEMBERS,
                         GatewayIntent.GUILD_PRESENCES
                 )
+                .setMemberCachePolicy(net.dv8tion.jda.api.utils.MemberCachePolicy.ALL)
+                .setChunkingFilter(net.dv8tion.jda.api.utils.ChunkingFilter.ALL)
                 .addEventListeners(
-                        new Main(),         // onReady + registrace příkazů
+                        new Main(),
                         new RoleUpdate(),
-                        commandManager      // jediná instance CommandManageru
+                        new CommandManager()
                 )
                 .build();
+
+        // Volitelné jednorázové vyčištění guild příkazů (aby zmizely duplikáty /e ze scope guild):
+        jda.awaitReady();
+        jda.getGuilds().forEach(guild -> guild.updateCommands().addCommands(java.util.List.of()).queue());
     }
 
     @Override
