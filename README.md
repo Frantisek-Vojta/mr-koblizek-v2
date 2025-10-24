@@ -11,7 +11,7 @@
 ## 🚀 Instalace a spuštění
 ### 1. Naklonování a příprava
 
-`git clone [odkaz-na-repozitar]`
+`git clone https://github.com/Frantisek-Vojta/mr-koblizek-v2.git`
 
 `cd ...`
 
