@@ -19,8 +19,8 @@ import java.util.List;
 
 public class RoleUpdate extends ListenerAdapter {
 
-    private static final long IGNORED_ROLE_ID = 1337335252728676392L;
-    private static final long LOG_CHANNEL_ID = 1338111857541779570L;
+    private static final long IGNORED_ROLE_ID = IDs of ignored roles;
+    private static final long LOG_CHANNEL_ID = ID CHANNEL LOG;
     private String avatarUrl;
 
     private void handleRoleChange(Guild guild, List<Role> roles, String userMention, boolean added, String avatarUrl) {

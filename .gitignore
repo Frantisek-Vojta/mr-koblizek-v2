@@ -45,3 +45,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+
+economy_data.json
+out/

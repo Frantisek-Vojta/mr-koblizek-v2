@@ -18,7 +18,7 @@ import java.util.List;
 public class Main extends ListenerAdapter {
 
     // POZOR: token nikdy nedávej do kódu. Použij např. proměnnou prostředí.
-    private static final String BOT_TOKEN = "MTQwNDQxNzg2Nzk0ODIzMjc1NQ.Gvdyov.w16UhKxmEe6xmdHB1C2upnGeTjN3z0aDZNb0gk";
+    private static final String BOT_TOKEN = "TOKEN";
 
     public static void main(String[] args) throws LoginException, InterruptedException {
         CommandManager commandManager = new CommandManager();
@@ -55,6 +55,10 @@ public class Main extends ListenerAdapter {
         // Basic commands
         commands.add(Commands.slash("ping", "Check bot latency"));
         commands.add(Commands.slash("help", "Show command list"));
+        commands.add(Commands.slash("botinfo", "Show info about bot"));
+        commands.add(Commands.slash("freenitro", "give you free nitro"));
+        commands.add(Commands.slash("meme", "meme"));
+        commands.add(Commands.slash("donut", "donut photo"));
 
         // Economy system
         commands.add(createEconomyCommand());
