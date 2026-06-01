@@ -14,7 +14,8 @@ public class EconomyData {
 
     public EconomyData() {
         this.coins = 1000; // Startovací peníze
-        this.currentJob = JobType.UNEMPLOYED;
+        // Původně UNEMPLOYED -> nově MINER jako výchozí job
+        this.currentJob = JobType.MINER;
         this.lastWorkTime = Instant.MIN;
         this.inventory = new HashMap<>();
     }

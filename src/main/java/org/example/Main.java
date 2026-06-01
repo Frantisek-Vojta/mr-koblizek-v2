@@ -2,85 +2,90 @@ package org.example;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandGroupData;
-
+import net.dv8tion.jda.api.interactions.commands.build.*;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.example.commands.RoleUpdate;
+import org.jetbrains.annotations.NotNull;
 
-public class Main {
+import javax.security.auth.login.LoginException;
+import java.util.ArrayList;
+import java.util.List;
 
-    // Vložte svůj token sem (necommitujte do veřejného repa):
-    private static final String TOKEN = "MTQwNDQxNzg2Nzk0ODIzMjc1NQ.G1DvCW.caU_YfnixlZ3McnziuOeJV5uMrhU-GQLShPfNI";
+public class Main extends ListenerAdapter {
 
-    public static void main(String[] args) throws Exception {
-        if (TOKEN == null || TOKEN.isBlank() || "<DISCORD_BOT_TOKEN>".equals(TOKEN)) {
-            System.err.println("Chyba: Token není nastaven. Upravte konstantu TOKEN v Main.java.");
-            System.exit(1);
-            return;
-        }
+    // POZOR: token nikdy nedávej do kódu. Použij např. proměnnou prostředí.
+    private static final String BOT_TOKEN = "TOKEN";
 
+    public static void main(String[] args) throws LoginException, InterruptedException {
+        CommandManager commandManager = new CommandManager();
 
-        JDABuilder builder = JDABuilder.createDefault(TOKEN)
+        JDA jda = JDABuilder.createDefault(BOT_TOKEN)
                 .enableIntents(
-                        GatewayIntent.GUILD_MEMBERS,     // PRO ROLE UPDATES
-                        GatewayIntent.MESSAGE_CONTENT,   // PRO PŘÍKAZY
-                        GatewayIntent.GUILD_PRESENCES    // PRO LEPŠÍ DETEKCI UŽIVATELŮ
+                        GatewayIntent.MESSAGE_CONTENT,
+                        GatewayIntent.GUILD_MEMBERS,
+                        GatewayIntent.GUILD_PRESENCES
                 )
-                .setActivity(Activity.playing("economy"));
+                .setMemberCachePolicy(net.dv8tion.jda.api.utils.MemberCachePolicy.ALL)
+                .setChunkingFilter(net.dv8tion.jda.api.utils.ChunkingFilter.ALL)
+                .addEventListeners(
+                        new Main(),
+                        new RoleUpdate(),
+                        new CommandManager()
+                )
+                .build();
 
-        // Přidejte oba listenery
-        builder.addEventListeners(new CommandManager(), new RoleUpdate());
-
-        JDA jda = builder.build();
+        // Volitelné jednorázové vyčištění guild příkazů (aby zmizely duplikáty /e ze scope guild):
         jda.awaitReady();
-        System.out.println("Bot je online jako: " + jda.getSelfUser().getAsTag());
+        jda.getGuilds().forEach(guild -> guild.updateCommands().addCommands(java.util.List.of()).queue());
+    }
 
-        // MODE: GUILD-ONLY registrace /e (okamžité) + smazání globální /e, aby se nezdvojovalo
+    @Override
+    public void onReady(@NotNull ReadyEvent event) {
+        System.out.println("[SYSTEM] Bot is now online! Registering commands...");
+        registerGlobalCommands(event.getJDA());
+    }
 
-        var econ = createEconomyCommand();
+    private void registerGlobalCommands(JDA jda) {
+        List<CommandData> commands = new ArrayList<>();
 
-        // 1) Smaž globální /e (pokud někdy existoval) – zabrání duplicitám
-        jda.retrieveCommands().queue(cmds -> cmds.stream()
-                .filter(c -> "e".equalsIgnoreCase(c.getName()))
-                .forEach(c -> c.delete().queue(
-                        v -> System.out.println("Smazán globální /e"),
-                        e -> System.err.println("Mazání globálního /e selhalo: " + e.getMessage())
-                ))
-        );
+        // Basic commands
+        commands.add(Commands.slash("ping", "Check bot latency"));
+        commands.add(Commands.slash("help", "Show command list"));
+        commands.add(Commands.slash("botinfo", "Show info about bot"));
+        commands.add(Commands.slash("freenitro", "give you free nitro"));
+        commands.add(Commands.slash("meme", "meme"));
+        commands.add(Commands.slash("donut", "donut photo"));
 
-        // 2) Upsert /e pro všechny guildy (okamžité)
-        jda.getGuilds().forEach(g ->
-                g.upsertCommand(econ).queue(
-                        v -> System.out.println("Upsert /e pro " + g.getName()),
-                        e -> System.err.println("Upsert /e selhal pro " + g.getName() + ": " + e.getMessage())
-                )
-        );
+        // Economy system
+        commands.add(createEconomyCommand());
 
-        // 3) Volitelně: pro jistotu smaž případné staré top-level /work na gildách (pokud se dřív registroval)
-        jda.getGuilds().forEach(g ->
-                g.retrieveCommands().queue(gcmds ->
-                        gcmds.stream()
-                                .filter(c -> "work".equalsIgnoreCase(c.getName()))
-                                .forEach(c -> c.delete().queue(
-                                        v -> System.out.println("Smazán /work v " + g.getName()),
-                                        e -> System.err.println("Mazání /work v " + g.getName() + " selhalo: " + e.getMessage())
-                                ))
-                )
+        jda.updateCommands().addCommands(commands).queue(
+                success -> System.out.println("[SUCCESS] Registered all commands"),
+                error -> {
+                    System.err.println("[ERROR] Failed to register commands: " + error.getMessage());
+                    error.printStackTrace();
+                }
         );
     }
 
-    // Definice /e se skupinou "job" a subpříkazy
-    private static CommandData createEconomyCommand() {
+    private CommandData createEconomyCommand() {
+        OptionData jobOption = new OptionData(OptionType.STRING, "job", "Select your profession", true)
+                .addChoices(
+                        new Command.Choice("Miner", "miner"),
+                        new Command.Choice("Fisher", "fisher"),
+                        new Command.Choice("Lumberjack", "lumberjack"),
+                        new Command.Choice("Programmer", "programmer"),
+                        new Command.Choice("CEO", "ceo")
+                );
+
         SubcommandGroupData jobGroup = new SubcommandGroupData("job", "Manage your profession")
                 .addSubcommands(
                         new SubcommandData("list", "View available jobs"),
-                        new SubcommandData("select", "Choose a profession")
-                                .addOption(OptionType.STRING, "job", "Select your profession", true),
+                        new SubcommandData("select", "Choose a profession").addOptions(jobOption),
                         new SubcommandData("leave", "Quit your current job")
                 );
 
