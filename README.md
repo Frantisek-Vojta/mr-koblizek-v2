@@ -1,140 +1,109 @@
 # mr. Koblizek v2
 
-#### Moderní Discord bot vytvořený v Javě pomocí knihovny JDA (Java Discord API) s ekonomickým systémem a užitečnými funkcemi.
+A modern Discord bot built in Java using the JDA (Java Discord API) library, featuring an integrated economy system and administrative utility tools.
 
-## 📋 Požadavky
+## Prerequisites
 
-- Java: Azul Zulu Community 21 nebo novější
-- Maven: Pro správu závislostí
-- Discord účet: Pro vytvoření bot aplikace
+- Java: Azul Zulu Community 21 or higher
+- Build Tool: Maven (for dependency management)
+- Discord Account: Access to the Discord Developer Portal to create and configure the bot application
 
-## 🚀 Instalace a spuštění
-### 1. Naklonování a příprava
+## Installation and Deployment
 
-`git clone https://github.com/Frantisek-Vojta/mr-koblizek-v2.git`
+1. Clone the Repository
+   git clone https://github.com/Frantisek-Vojta/mr-koblizek-v2.git
+   cd mr-koblizek-v2
 
-`cd ...`
+2. Token Configuration
+   - Open the file: src/main/java/org/example/Main.java
+   - On line 21, replace the TOKEN placeholder with your production Discord bot token.
 
-### 2. Konfigurace tokenu
+3. Logging Channel Configuration
+   - Open the file: src/main/java/org/example/commands/RoleUpdate.java
+   - Locate the LOG_CHANNEL_ID constant and replace it with your targeted Discord channel ID:
+     private static final long LOG_CHANNEL_ID = 123456789012345678L;
 
-- Otevřete soubor: `src/main/java/org/example/Main.java`
+4. Compilation and Execution
+   Execute the following commands to compile and launch the application:
+   mvn clean compile
+   mvn exec:java -Dexec.mainClass="org.example.Main"
 
-- Na řádku 21 nahraďte `TOKEN` vaším skutečným Discord bot tokenem:
+CRITICAL REQUIREMENT: The bot must be granted Administrator permissions within the target server to ensure full operational capacity.
 
+--------------------------------------------------------------------------------
 
-### 3. Konfigurace kanálu pro role
+## Command Registry
 
-- Otevřete soubor: `src/main/java/org/example/commands/RoleUpdate.java`
-- Najděte konstantu a nahraďte ID kanálu:
-  `private static final long LOG_CHANNEL_ID = 123456789012345678L;`
+### Standard Commands
+- /botinfo     - Displays technical and general information about the bot instance.
+- /donut       - Simulates acquiring a donut item.
+- /freenitro   - Executes a joke/prank command.
+- /help        - Returns a comprehensive list of available commands and documentation.
+- /meme        - Fetches and displays a random meme from the configured source.
+- /ping        - Measures and returns the current network latency of the bot.
 
-### 4. Sestavení a spuštění
-- mvn clean compile
-- mvn exec:java -Dexec.mainClass="org.example.Main"
+### Economy System Commands (/e ...)
+- /e balance   - Displays the current financial balance of the executing user.
+- /e baltop    - Generates a leaderboard showing the wealthiest users on the server.
+- /e help      - Provides documentation specific to the economy subsystem.
+- /e profile   - Retrieves the economy-specific profile data of the user.
+- /e slots     - Simulates a slot machine game using economy balance.
+- /e work      - Executes a work shift to generate economy currency.
 
-## ⚙️ Konfigurace Discord bota
-- ⚠️ Bot musi mit admin prava ⚠️
+--------------------------------------------------------------------------------
 
-## 🎯 Dostupné příkazy
-#### Základní příkazy
+## Inactive / Legacy Features
 
--    /botinfo - Informace o botovi
+The following features are currently registered but marked as non-functional or under active maintenance:
+- guess        - Number guessing minigame
+- love         - Compatibility calculator
+- /e buy       - Item purchasing module
+- /e job       - Career and employment modules
+- /e shop      - Item shop interface
 
--   /donut - Získejte donut! 🍩
+--------------------------------------------------------------------------------
 
--  /freenitro - Žertovný příkaz
+## Automated Logging Functionality
 
-- /help - Nápověda a seznam příkazů
+The bot includes an automated event listener that monitors role updates across the guild. When a role is assigned or removed, a structured embed is dispatched to the designated logging channel containing:
+- Target user identifier
+- Assigned or removed role attributes
+- Executor (the administrator or system process that applied the change)
+- Timestamp of the transaction
 
-- /meme - Náhodný meme
+--------------------------------------------------------------------------------
 
-- /ping - Otestujte odezvu bota
+## Troubleshooting Matrix
 
-#### Ekonomický systém (/e ...)
+- Observed Issue: Bot does not respond to commands
+  Remediation: Verify the integrity of the token in Main.java. Confirm that the application has been granted correct permissions in the Discord Developer Portal and server.
 
--  /e balance - Zobrazí váš zůstatek
+- Observed Issue: Role updates are not logged
+  Remediation: Verify that LOG_CHANNEL_ID matches a valid, accessible text channel. Ensure the bot has explicit write permissions for that specific channel.
 
-- /e baltop - Žebříček nejbohatších uživatelů
+- Observed Issue: Economy module malfunctions
+  Remediation: Check if the command is listed under the "Inactive Features" section. Features under active development may be unstable.
 
-- /e help - Nápověda ekonomického systému
+--------------------------------------------------------------------------------
 
--  /e profile - Váš ekonomický profil
+## Development and Extensibility
 
-- /e slots - Hra na výherních automatech
+To implement new command modules, adhere to the established architectural pattern:
+1. Create a new class within the commands package.
+2. Implement the core Command interface.
+3. Register the new class instance within Listener.java.
 
-- /e work - Pracujte a vydělávejte peníze
+--------------------------------------------------------------------------------
 
-## 🚧 Neaktivní příkazy 🚧
+## Contribution Guidelines
 
-#### Následující příkazy jsou momentálně nefunkční:
-- guess - Hádani cisla
-- love - Kalkulátor lásky
+Contributions are welcome via standard GitHub workflows:
+1. Fork the repository.
+2. Create a dedicated feature branch (git checkout -b feature/YourFeature).
+3. Commit your changes with clear, descriptive messages.
+4. Push the branch to your remote fork and open a Pull Request.
 
-#### Neaktivní ekonomické příkazy:
+--------------------------------------------------------------------------------
 
-- /e buy - Nákup předmětů
-
-- /e job - Práce a zaměstnání
-
-- /e shop - Obchod s předměty
-
-## 🔧 Funkce rolí
-
-#### Bot automaticky oznamuje přiřazení rolí v nastaveném kanálu. Když uživatel obdrží roli, objeví se embed zpráva s informacemi:
-
-    👤 Uživatel, který roli obdržel
-
-    🎭 Přidělená role
-
-    👮 Uživatel, který roli přiřadil
-
-    ⏰ Čas přiřazení
-
-## 🐛 Řešení problémů
-#### Časté problémy:
-
-    Bot nereaguje na příkazy
-
-    Zkontrolujte token v Main.java
-
-    Ověřte oprávnění bota na serveru
-
-    Oznámení o rolích se nezobrazují
-
-    Zkontrolujte LOG_CHANNEL_ID v RoleUpdate.java
-    Ověřte, zda má bot oprávnění k zápisu do kanálu
-
-    Ekonomické příkazy nefungují
-
-    Některé ekonomické funkce jsou ve vývoji
-
-    Používejte pouze funkční příkazy uvedené výše
-
-## 📝 Vývoj
-
-#### Chcete-li přidat nové příkazy:
-
-    Vytvořte novou třídu v balíčku commands
-
-    Implementujte Command rozhraní
-
-    Přidejte registraci v Listener.java
-
-## 🤝 Přispívání
-
-#### Přispěvatelé jsou vítáni!
-
-    Forkněte repozitář
-
-    Vytvořte feature branch
-
-    Commitněte změny
-
-    Pushněte do branch
-
-    Otevřete Pull Request
-
-
-## support: [Discord server](https://discord.gg/d5V3vmMByb)
-
-
+## Support
+Official Discord Server: https://dsc.gg/xcel-resources
