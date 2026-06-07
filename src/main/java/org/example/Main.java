@@ -49,7 +49,7 @@ public class Main extends ListenerAdapter {
     private void registerGlobalCommands(JDA jda) {
         List<CommandData> commands = new ArrayList<>();
 
-        // Basic commands
+        // commands
         commands.add(Commands.slash("ping", "Check bot latency"));
         commands.add(Commands.slash("help", "Show command list"));
         commands.add(Commands.slash("botinfo", "Show info about bot"));
@@ -63,6 +63,8 @@ public class Main extends ListenerAdapter {
                 .addOption(OptionType.USER, "user2", "Second user", true));
         commands.add(Commands.slash("8ball", "Ask the Magic 8-Ball a question")
                 .addOption(OptionType.STRING, "question", "Your yes/no question", true));
+        commands.add(Commands.slash("roast", "Roast a user")
+                .addOption(OptionType.USER, "user", "User to roast", true));
 
         // Economy system
         commands.add(createEconomyCommand());

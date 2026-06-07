@@ -25,6 +25,7 @@ public class CommandManager extends ListenerAdapter {
         registerCommand(new LoveCommand());
         registerCommand(new MemeCommand());
         registerCommand(new EightBallCommand());
+        registerCommand(new RoastCommand());
     }
 
     private void registerCommand(Command command) {
