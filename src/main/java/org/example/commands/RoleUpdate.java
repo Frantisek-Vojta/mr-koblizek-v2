@@ -36,7 +36,7 @@ public class RoleUpdate extends ListenerAdapter {
 
         if (!guild.getSelfMember().hasPermission(Permission.VIEW_AUDIT_LOGS)) {
             System.out.println("[ROLE ERROR] Bot lacks VIEW_AUDIT_LOGS permission!");
-            // mention role i uživatele, executor bez mention (neznámý)
+            // mention role and user, executor unknown (no permission)
             sendSimpleLog(guild, userMention, role.getAsMention(), added, avatarUrl, "Unknown (No permission)");
             return;
         }
@@ -50,7 +50,7 @@ public class RoleUpdate extends ListenerAdapter {
                         if (entry.getTargetIdLong() == role.getIdLong() ||
                                 System.currentTimeMillis() - entry.getTimeCreated().toInstant().toEpochMilli() < 5000) {
                             if (entry.getUser() != null) {
-                                executorMention = entry.getUser().getAsMention(); // MENTION exekutora
+                                executorMention = entry.getUser().getAsMention();
                                 break;
                             }
                         }
@@ -121,9 +121,9 @@ private void sendSimpleLog(Guild guild, String targetUserMention, String roleMen
     );
 }
 
-// Přidá požadované emodži jako reakce k odeslané zprávě
+// Adds emoji reactions to the sent message
 private void addReactions(net.dv8tion.jda.api.entities.Message message, Guild guild) {
-    // Unicode reakce
+    // Unicode reactions
     message.addReaction(net.dv8tion.jda.api.entities.emoji.Emoji.fromUnicode("🔥")).queue(); // fire
     message.addReaction(net.dv8tion.jda.api.entities.emoji.Emoji.fromUnicode("💀")).queue(); // :skull:
     message.addReaction(net.dv8tion.jda.api.entities.emoji.Emoji.fromUnicode("😎")).queue(); // :sunglasses:

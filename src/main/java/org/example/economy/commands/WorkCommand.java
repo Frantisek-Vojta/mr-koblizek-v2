@@ -27,7 +27,7 @@ public class WorkCommand extends EconomyCommand {
     @Override
     public void execute(SlashCommandInteractionEvent event) {
         UserData userData = database.getUserData(event.getUser().getId());
-        // Zajistíme výchozí job MINER, pokud uživatel žádný nemá / je UNEMPLOYED
+        // Fall back to MINER if the user has no job or is UNEMPLOYED
         JobType job = jobManager.ensureDefaultJob(userData);
         Instant now = Instant.now();
 
@@ -55,7 +55,7 @@ public class WorkCommand extends EconomyCommand {
     }
 
     private boolean canWork(UserData userData, Instant now) {
-        // ensure výchozí job kvůli cooldownu
+        // Ensure default job before checking cooldown
         JobType job = jobManager.ensureDefaultJob(userData);
         Instant lastWork = userData.getLastWork();
         if (lastWork.equals(Instant.MIN)) {

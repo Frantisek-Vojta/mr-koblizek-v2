@@ -38,7 +38,7 @@ public class BaltopCommand extends EconomyCommand {
         for (int i = 0; i < topUsers.size(); i++) {
             UserData userData = topUsers.get(i);
 
-            // Vytvoříme mention pomocí user ID - to vytvoří klikatelný ping
+            // Build mention from user ID to create a clickable ping
             String userMention = "<@" + userData.getUserId() + ">";
 
             description.append("**")

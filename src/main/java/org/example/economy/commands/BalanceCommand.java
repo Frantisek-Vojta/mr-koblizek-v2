@@ -30,7 +30,7 @@ public class BalanceCommand extends EconomyCommand {
             .setColor(0x5865F2)
             .setThumbnail(user.getEffectiveAvatarUrl())
             .addField("Coins", String.format("%,d", userData.getCoins()), true)
-            .addField("Bank", "0", true); // Můžete dodělat bankovní systém později
+            .addField("Bank", "0", true); // TODO: implement bank system
             
         event.replyEmbeds(embed.build()).queue();
     }

@@ -6,12 +6,12 @@ import java.util.Random;
 
 public class SlotsMachine {
     private static final List<String> SYMBOLS = Arrays.asList(
-            "🍒", "🍒",  // Méně časté symboly
+            "🍒", "🍒",  // Less frequent symbols
             "🍊",
             "🍋",
             "🍇",
             "🍉",
-            "7️⃣"  // Vzácnější jackpot symbol
+            "7️⃣"  // Rarer jackpot symbol
     );
     private static final Random random = new Random();
 
@@ -28,24 +28,24 @@ public class SlotsMachine {
     }
 
     public int calculateMultiplier(List<List<String>> grid) {
-        // Jackpot - všechny 7️⃣ v hlavní diagonále
+        // Jackpot - all 7️⃣ on the main diagonal
         if (grid.get(0).get(0).equals("7️⃣") &&
                 grid.get(1).get(1).equals("7️⃣") &&
                 grid.get(2).get(2).equals("7️⃣")) {
             return 15;
         }
 
-        // Kontrola řádků
+        // Check rows
         for (List<String> row : grid) {
             if (row.stream().allMatch(s -> s.equals("7️⃣"))) {
                 return 10;
             }
             if (row.stream().allMatch(s -> s.equals(row.get(0)))) {
-                return row.get(0).equals("🍒") ? 3 : 5;  // Menší výhra za třešně
+                return row.get(0).equals("🍒") ? 3 : 5;  // Smaller win for cherries
             }
         }
 
-        // Kontrola sloupců
+        // Check columns
         for (int col = 0; col < 3; col++) {
             if (grid.get(0).get(col).equals(grid.get(1).get(col)) &&
                     grid.get(1).get(col).equals(grid.get(2).get(col))) {
@@ -53,7 +53,7 @@ public class SlotsMachine {
             }
         }
 
-        // Kontrola diagonál
+        // Check diagonals
         if ((grid.get(0).get(0).equals(grid.get(1).get(1)) &&
                 grid.get(1).get(1).equals(grid.get(2).get(2)))) {
             return 3;
@@ -63,11 +63,11 @@ public class SlotsMachine {
             return 3;
         }
 
-        // Dva stejné symboly vedle sebe (horizontálně)
+        // Two matching symbols side by side (horizontally)
         for (List<String> row : grid) {
             if ((row.get(0).equals(row.get(1)) ||
                     row.get(1).equals(row.get(2))) &&
-                    !row.get(0).equals("🍒")) {  // Bez odměny za dvě třešně
+                    !row.get(0).equals("🍒")) {  // No reward for two cherries
                 return 1;
             }
         }

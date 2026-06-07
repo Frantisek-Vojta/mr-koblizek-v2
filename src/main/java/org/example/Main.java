@@ -17,12 +17,9 @@ import java.util.List;
 
 public class Main extends ListenerAdapter {
 
-    // POZOR: token nikdy nedávej do kódu. Použij např. proměnnou prostředí.
     private static final String BOT_TOKEN = "TOKEN";
 
     public static void main(String[] args) throws LoginException, InterruptedException {
-        CommandManager commandManager = new CommandManager();
-
         JDA jda = JDABuilder.createDefault(BOT_TOKEN)
                 .enableIntents(
                         GatewayIntent.MESSAGE_CONTENT,
@@ -38,7 +35,7 @@ public class Main extends ListenerAdapter {
                 )
                 .build();
 
-        // Volitelné jednorázové vyčištění guild příkazů (aby zmizely duplikáty /e ze scope guild):
+        // One-time cleanup of guild-scoped commands (removes /e duplicates from guild scope):
         jda.awaitReady();
         jda.getGuilds().forEach(guild -> guild.updateCommands().addCommands(java.util.List.of()).queue());
     }
@@ -59,6 +56,13 @@ public class Main extends ListenerAdapter {
         commands.add(Commands.slash("freenitro", "give you free nitro"));
         commands.add(Commands.slash("meme", "meme"));
         commands.add(Commands.slash("donut", "donut photo"));
+        commands.add(Commands.slash("guess", "Guess a number between 1 and 2")
+                .addOption(OptionType.INTEGER, "number", "Your guess", true));
+        commands.add(Commands.slash("love", "Check compatibility between two users")
+                .addOption(OptionType.USER, "user", "First user", true)
+                .addOption(OptionType.USER, "user2", "Second user", true));
+        commands.add(Commands.slash("8ball", "Ask the Magic 8-Ball a question")
+                .addOption(OptionType.STRING, "question", "Your yes/no question", true));
 
         // Economy system
         commands.add(createEconomyCommand());

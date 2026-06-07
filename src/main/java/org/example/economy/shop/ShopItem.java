@@ -5,7 +5,7 @@ public class ShopItem {
     private final String name;
     private final String description;
     private final int price;
-    private final int durationDays; // Pro dočasné efekty
+    private final int durationDays; // For temporary effects
 
     public ShopItem(String id, String name, String description, int price, int durationDays) {
         this.id = id;

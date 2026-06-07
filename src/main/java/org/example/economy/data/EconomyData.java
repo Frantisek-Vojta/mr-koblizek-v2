@@ -13,8 +13,8 @@ public class EconomyData {
     private Map<String, Integer> inventory;
 
     public EconomyData() {
-        this.coins = 1000; // Startovací peníze
-        // Původně UNEMPLOYED -> nově MINER jako výchozí job
+        this.coins = 1000; // Starting balance
+        // Default job changed from UNEMPLOYED to MINER
         this.currentJob = JobType.MINER;
         this.lastWorkTime = Instant.MIN;
         this.inventory = new HashMap<>();

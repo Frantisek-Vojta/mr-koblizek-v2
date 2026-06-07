@@ -24,6 +24,7 @@ public class CommandManager extends ListenerAdapter {
         registerCommand(new BotInfoCommand());
         registerCommand(new LoveCommand());
         registerCommand(new MemeCommand());
+        registerCommand(new EightBallCommand());
     }
 
     private void registerCommand(Command command) {
@@ -51,7 +52,7 @@ public class CommandManager extends ListenerAdapter {
 
     private void handleEconomyCommand(SlashCommandInteractionEvent event) {
         try {
-            // Důležité: odpovědět do 3 s (případně deferReply)
+            // Important: must reply within 3s (or use deferReply)
             economyManager.handleCommand(event);
         } catch (Exception e) {
             event.reply("❌ An error occurred while executing the economy command.")
@@ -63,7 +64,7 @@ public class CommandManager extends ListenerAdapter {
 
     private void executeCommandSafely(SlashCommandInteractionEvent event, Command command) {
         try {
-            // Důležité: command.execute by měl buď reply(), nebo deferReply() okamžitě
+            // Important: command.execute must call either reply() or deferReply() immediately
             command.execute(event);
         } catch (Exception e) {
             event.reply("❌ An error occurred while executing this command.")
@@ -73,7 +74,7 @@ public class CommandManager extends ListenerAdapter {
         }
     }
 
-    // Volitelně: pokud bys chtěl explicitně delegovat z jiných míst
+    // Optional: explicit delegation entry point for external callers
     public void handle(SlashCommandInteractionEvent event) {
         onSlashCommandInteraction(event);
     }

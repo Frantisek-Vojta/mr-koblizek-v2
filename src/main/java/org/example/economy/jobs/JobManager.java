@@ -13,7 +13,7 @@ public class JobManager {
         this.database = database;
     }
 
-    // Zajistí, že uživatel má vždy alespoň MINER
+    // Ensures the user always has at least the MINER job
     public JobType ensureDefaultJob(UserData userData) {
         JobType job = userData.getJob();
         if (job == null || job == JobType.UNEMPLOYED) {
