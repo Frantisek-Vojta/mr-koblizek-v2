@@ -23,6 +23,7 @@ public class HelpCommand implements Command {
                 .addField("/love [user1] [user2]", "Calculate love percentage between two users", false)
                 .addField("/meme", "Get a random meme", false)
                 .addField("/8ball [question]", "Ask the Magic 8-Ball a yes/no question", false)
+                .addField("/roast [@user]", "Roast a user with a random burn", false)
                 .setColor(0xfcb603);
 
         event.replyEmbeds(embed.build()).queue();
