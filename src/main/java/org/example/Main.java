@@ -65,6 +65,7 @@ public class Main extends ListenerAdapter {
                 .addOption(OptionType.STRING, "question", "Your yes/no question", true));
         commands.add(Commands.slash("roast", "Roast a user")
                 .addOption(OptionType.USER, "user", "User to roast", true));
+        commands.add(Commands.slash("coinflip", "Flip a coin"));
 
         // Economy system
         commands.add(createEconomyCommand());
